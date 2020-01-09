@@ -44,27 +44,35 @@ const sellItemWizard = new WizardScene(
     */
     logger.info(`${ctx.from.username} entered step 2 of ${SELL_ITEM_WIZARD}`);
     // Check if user sent a message and not a callback_query, if it is a message check if it is a text and not a GIF/Sticker
-    if (!ctx.message || !ctx.message.text) {
-      await ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", {
-        parse_mode: "HTML"
-      });
+    if (!ctx.message) {
+      return;
+    }
+    if (!ctx.message.text) {
+      const { message_id } = ctx.message;
+      // If user sends random non-text message, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
       return;
     }
     // If I get here, text is defined
     const { text } = ctx.message;
     // Check if text is a bot command, commands are not accepted
     if (text.startsWith("/")) {
-      await ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", {
-        parse_mode: "HTML"
-      });
+      const { message_id } = ctx.message;
+      // If user sends a text containing a bot command, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
       return;
     }
     // Update wizard state with given validated title
     ctx.wizard.state.title = text;
 
     logger.info(`${ctx.from.username} inserted title:`, text);
-    await ctx.reply(`${package} Titolo: ${text}`, prompt);
-    return ctx.wizard.next();
+    try {
+      await ctx.reply(`${package} Titolo: ${text}`, prompt);
+      return ctx.wizard.next();
+    } catch (error) {
+      logger.error({ error });
+      return;
+    }
   },
   // Step 3 of Wizard - Title Confirmation and Ask For Description
   async ctx => {
@@ -117,20 +125,22 @@ const sellItemWizard = new WizardScene(
     logger.info(`${ctx.from.username} entered step 4 of ${SELL_ITEM_WIZARD}`);
 
     // Check if user sent a message and not a callback_query, if it is a message check if it is a text and not a GIF/Sticker
-    if (!ctx.message || !ctx.message.text) {
-      await ctx.reply("<b>Inserisci la descrizione dell'annuncio</b>", {
-        parse_mode: "HTML"
-      });
+    if (!ctx.message) {
+      return;
+    }
+    if (!ctx.message.text) {
+      const { message_id } = ctx.message;
+      // If user sends random non-text message, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
       return;
     }
     // If I get here, text is defined
     const { text } = ctx.message;
-
     // Check if text is a bot command, commands are not accepted
     if (text.startsWith("/")) {
-      await ctx.reply("<b>Inserisci la descrizione dell'annuncio</b>", {
-        parse_mode: "HTML"
-      });
+      const { message_id } = ctx.message;
+      // If user sends a text containing a bot command, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
       return;
     }
 
@@ -138,8 +148,13 @@ const sellItemWizard = new WizardScene(
     ctx.wizard.state.description = text;
 
     logger.info(`${ctx.from.username} inserted description:`, text);
-    await ctx.reply(`${memo} Descrizione: ${text}`, prompt);
-    return ctx.wizard.next();
+    try {
+      await ctx.reply(`${memo} Descrizione: ${text}`, prompt);
+      return ctx.wizard.next();
+    } catch (error) {
+      logger.error({ error });
+      return;
+    }
   },
   // Step 5 of Wizard - Description Confirmation and Ask For Product's Image
   async ctx => {
@@ -193,14 +208,18 @@ const sellItemWizard = new WizardScene(
 
     logger.info(`${ctx.from.username} entered step 6 of ${SELL_ITEM_WIZARD}`);
 
-    if (!ctx.message || !ctx.message.photo) {
+    if (!ctx.message) {
+      return;
+    }
+
+    if (!ctx.message.photo) {
       const { message_id } = ctx.message;
       // If user sends random message, delete it in order to avoid chat cluttering
       ctx.deleteMessage(message_id);
       return;
     }
-    logger.info(`${ctx.from.username} uploaded an image`);
-    const { file_id } = ctx.message.photo[1];
+
+    const { file_id } = ctx.message.photo[1]; // photo[0] is the thumbnail
     ctx.wizard.state.image_id = file_id;
 
     await ctx.reply(
@@ -218,12 +237,9 @@ const sellItemWizard = new WizardScene(
     */
     logger.info(`${ctx.from.username} entered step 7 of ${SELL_ITEM_WIZARD}`);
     if (!ctx.message) {
-      const { message_id } = ctx.message;
-      // If user sends random message, delete it in order to avoid chat cluttering
-      ctx.deleteMessage(message_id);
       return;
     }
-    if (isNaN(ctx.message.text)) {
+    if (!ctx.message.text || isNaN(ctx.message.text.replace(",", "."))) {
       const { message_id } = ctx.message;
       // If user sends random message, delete it in order to avoid chat cluttering
       ctx.deleteMessage(message_id);
@@ -233,8 +249,16 @@ const sellItemWizard = new WizardScene(
     const { text } = ctx.message;
     // Convert string into a floating point number
     ctx.wizard.state.value = parseFloat(text.replace(",", "."));
-    await ctx.reply(`${moneyBag} Prezzo: ${text}€`, prompt);
-    return ctx.wizard.next();
+    try {
+      await ctx.reply(`${moneyBag} Prezzo: ${ctx.wizard.state.value}€`, prompt);
+      return ctx.wizard.next();
+    } catch (error) {
+      logger.error({ error });
+      ctx.reply(
+        "Qualcosa è andato storto, messagio non inviato. Riprova piu tardi"
+      );
+      return ctx.wizard.leave();
+    }
   },
   // Step 8 of Wizard - Value Confirmation
   async ctx => {
@@ -263,25 +287,32 @@ const sellItemWizard = new WizardScene(
         return ctx.scene.leave();
       case NEXT_STEP:
         logger.info(`${ctx.from.username} confirmed value`);
-        await ctx.reply(
-          "Il tuo annuncio è stato inviato agli amministratori. Verrai notificato qua nel bot per aggiornamenti"
-        );
         const { title, description, image_id, value } = ctx.wizard.state;
         const { username, first_name, id } = ctx.from;
-        await ctx.telegram.sendPhoto(process.env.SECRET_CHAT_ID, image_id, {
-          caption: generateCaption(
-            first_name,
-            username,
-            id,
-            title,
-            description,
-            value
-          )
-        });
+        try {
+          await ctx.telegram.sendPhoto(process.env.SECRET_CHAT_ID, image_id, {
+            caption: generateCaption(
+              first_name,
+              username,
+              id,
+              title,
+              description,
+              value
+            )
+          });
+          logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
+          ctx.reply(
+            "Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato"
+          );
+        } catch (error) {
+          logger.error(error);
+          ctx.reply(
+            "Errore, impossibile inviare il tuo messaggio. Riprova piu tardi"
+          );
+        }
+
         //const imageUrl = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/getFile?file_id=${image_id}`;
-        logger.info(
-          `${ctx.from.username}' sale announcement was sent to administartors`
-        );
+
         return ctx.scene.leave();
       case PREVIOUS_STEP:
         await ctx.reply("Reinserisci Il prezzo");
