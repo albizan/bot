@@ -1,0 +1,21 @@
+{
+  "name": "nasbot",
+  "version": "1.0.0",
+  "description": "BOT made with telegraf nodejs framework. Used to manage HW and tech sales",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "start:dev": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.2",
+    "pino": "^5.15.0",
+    "telegraf": "^3.35.0"
+  },
+  "devDependencies": {
+    "pino-pretty": "^3.5.0"
+  }
+}
