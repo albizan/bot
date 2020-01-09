@@ -35,7 +35,7 @@ bot.use(stage.middleware());
 
 bot.start(ctx => {
   const { first_name, id, username } = ctx.from;
-  logger.info(`User ${username} started Nas BOT`);
+  logger.info(`${username} started Nas BOT`);
 
   // When user starts bot, show welcome message in private chat and asks for type of action
   ctx.telegram.sendMessage(
