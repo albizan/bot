@@ -3,5 +3,6 @@ module.exports = {
   memo: "\u{1F4DD}",
   moneyBag: "\u{1F4B0}",
   moneyFly: "\u{1F4B8}",
-  silhouette: "\u{1F464}"
+  silhouette: "\u{1F464}",
+  checkMark: "\u{2705}"
 };
