@@ -183,9 +183,12 @@ const sellItemWizard = new WizardScene(
         return ctx.scene.leave();
       case NEXT_STEP:
         logger.info(`${ctx.from.username} confirmed description`);
-        await ctx.reply("<b>Invia una immagine dettagliata del prodotto</b>", {
-          parse_mode: "HTML"
-        });
+        await ctx.reply(
+          "<b>Invia una o piu foto del prodotto, quando hai finito digita /avanti</b>",
+          {
+            parse_mode: "HTML"
+          }
+        );
         return ctx.wizard.next();
       case PREVIOUS_STEP:
         await ctx.reply("<b>Reinserisci la descrizione dell'annuncio</b>", {
@@ -212,20 +215,31 @@ const sellItemWizard = new WizardScene(
       return;
     }
 
+    if (ctx.message.text === "/avanti") {
+      if (!ctx.wizard.state.images) {
+        ctx.reply("Inserisci almeno un immagine");
+        return;
+      }
+      await ctx.reply(
+        "Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)"
+      );
+      return ctx.wizard.next();
+    }
+
     if (!ctx.message.photo) {
       const { message_id } = ctx.message;
-      // If user sends random message, delete it in order to avoid chat cluttering
+      // If user sends random message that is not a photo, delete it in order to avoid chat cluttering
       ctx.deleteMessage(message_id);
       return;
     }
 
-    const { file_id } = ctx.message.photo[1]; // photo[0] is the thumbnail
-    ctx.wizard.state.image_id = file_id;
-
-    await ctx.reply(
-      "Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)"
-    );
-    return ctx.wizard.next();
+    const { file_id } = ctx.message.photo[ctx.message.photo.length - 1]; // photo[max] is the max resolution image
+    ctx.wizard.state.images =
+      ctx.wizard.state.images === undefined
+        ? [file_id]
+        : [...ctx.wizard.state.images, file_id];
+    logger.info(`${ctx.from.username} uploaded an image`);
+    return;
   },
   // Step 7 of Wizard - Value Validation
   async ctx => {
@@ -260,7 +274,7 @@ const sellItemWizard = new WizardScene(
       return ctx.wizard.leave();
     }
   },
-  // Step 8 of Wizard - Value Confirmation
+  // Step 8 of Wizard - Value Confirmation and send completed sale's announce
   async ctx => {
     /* 
       Validate user's response (only text callback_queries are accepted)
@@ -287,10 +301,28 @@ const sellItemWizard = new WizardScene(
         return ctx.scene.leave();
       case NEXT_STEP:
         logger.info(`${ctx.from.username} confirmed value`);
-        const { title, description, image_id, value } = ctx.wizard.state;
+        logger.info(ctx.wizard.state);
+        const { title, description, images, value } = ctx.wizard.state;
         const { username, first_name, id } = ctx.from;
         try {
-          await ctx.telegram.sendPhoto(process.env.SECRET_CHAT_ID, image_id, {
+          // generate array of inputMediaPhoto to be sent with sendMediaGroup
+          const media = images.map(file_id => {
+            return {
+              type: "photo",
+              media: file_id
+            };
+          });
+          // Append caption to first image of media array, telegram client will display it as caption for the whole album
+          media[0].caption = generateCaption(
+            first_name,
+            username,
+            id,
+            title,
+            description,
+            value
+          );
+          await ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
+          /* await ctx.telegram.sendPhoto(process.env.SECRET_CHAT_ID, images[0], {
             caption: generateCaption(
               first_name,
               username,
@@ -299,7 +331,7 @@ const sellItemWizard = new WizardScene(
               description,
               value
             )
-          });
+          }); */
           logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
           ctx.reply(
             "Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato"
