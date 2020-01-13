@@ -5,7 +5,11 @@ const { SELL_ITEM_WIZARD } = require("../types/scenes.types");
 const {
   NEXT_STEP,
   PREVIOUS_STEP,
-  CLOSE_WIZARD
+  CLOSE_WIZARD,
+  PAYPAL,
+  HYPE,
+  CASH,
+  TRANSFER
 } = require("../types/callbacks.types");
 
 // Import caption helper
@@ -15,7 +19,7 @@ const { generateCaption } = require("../helper");
 const logger = require("../logger");
 
 // Import emojis
-const { package, memo, moneyBag } = require("../emoji");
+const { package, memo, moneyBag, checkMark } = require("../emoji");
 
 // A wizard is a special type of scene
 const sellItemWizard = new WizardScene(
@@ -29,7 +33,7 @@ const sellItemWizard = new WizardScene(
       Wait for user's input and then go to next step
     */
     logger.info(`${ctx.from.username} entered ${SELL_ITEM_WIZARD}`);
-    ctx.wizard.state = {};
+    ctx.wizard.state.paymentMethods = [];
     await ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", {
       parse_mode: "HTML"
     });
@@ -156,7 +160,7 @@ const sellItemWizard = new WizardScene(
       return;
     }
   },
-  // Step 5 of Wizard - Description Confirmation and Ask For Product's Image
+  // Step 5 of Wizard - Description Confirmation and Ask For Product's Images
   async ctx => {
     /*
       Validate user's response (only text callback_queries are accepted)
@@ -169,9 +173,11 @@ const sellItemWizard = new WizardScene(
     logger.info(`${ctx.from.username} entered step 5 of ${SELL_ITEM_WIZARD}`);
 
     if (!ctx.callbackQuery) {
-      const { message_id } = ctx.message;
-      // If user sends random message, delete it in order to avoid chat cluttering
-      ctx.deleteMessage(message_id);
+      if (ctx.message) {
+        const { message_id } = ctx.message;
+        // If user sends random message, delete it in order to avoid chat cluttering
+        ctx.deleteMessage(message_id);
+      }
       return;
     }
     const { data } = ctx.callbackQuery;
@@ -271,10 +277,10 @@ const sellItemWizard = new WizardScene(
       ctx.reply(
         "Qualcosa è andato storto, messagio non inviato. Riprova piu tardi"
       );
-      return ctx.wizard.leave();
+      return ctx.scene.leave();
     }
   },
-  // Step 8 of Wizard - Value Confirmation and send completed sale's announce
+  // Step 8 of Wizard - Value Confirmation and show payments inline keyboard
   async ctx => {
     /* 
       Validate user's response (only text callback_queries are accepted)
@@ -292,7 +298,10 @@ const sellItemWizard = new WizardScene(
       return;
     }
     const { data } = ctx.callbackQuery;
-
+    const { paymentMethods } = ctx.wizard.state;
+    const paymentMethodsPrompt = generatePaymentsInlineKeyboardMarkup(
+      paymentMethods
+    );
     switch (data) {
       case CLOSE_WIZARD:
         logger.info(
@@ -301,8 +310,41 @@ const sellItemWizard = new WizardScene(
         return ctx.scene.leave();
       case NEXT_STEP:
         logger.info(`${ctx.from.username} confirmed value`);
-        logger.info(ctx.wizard.state);
-        const { title, description, images, value } = ctx.wizard.state;
+        ctx.reply("Seleziona i metodi di pagamento", paymentMethodsPrompt);
+        return ctx.wizard.next();
+      case PREVIOUS_STEP:
+        await ctx.reply("Reinserisci Il prezzo");
+        return ctx.wizard.back();
+      default:
+        await ctx.reply("Bzzagrakkchhabz", "Bot is dead", "You killed the bot");
+        return ctx.scene.leave();
+    }
+  },
+  // Step 9 of Wizard - Add Payment methods or Complete
+  async ctx => {
+    if (!ctx.callbackQuery) {
+      if (ctx.message) {
+        const { message_id } = ctx.message;
+        // If user sends random message, delete it in order to avoid chat cluttering
+        ctx.deleteMessage(message_id);
+      }
+      return;
+    }
+    const { data } = ctx.callbackQuery;
+
+    switch (data) {
+      case NEXT_STEP:
+        if (ctx.wizard.state.paymentMethods.length <= 0) {
+          ctx.reply("Seleziona almeno un metodo di pagamento");
+          return;
+        }
+        const {
+          title,
+          description,
+          images,
+          value,
+          paymentMethods
+        } = ctx.wizard.state;
         const { username, first_name, id } = ctx.from;
         try {
           // generate array of inputMediaPhoto to be sent with sendMediaGroup
@@ -319,39 +361,229 @@ const sellItemWizard = new WizardScene(
             id,
             title,
             description,
-            value
+            value,
+            paymentMethods
           );
           await ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
-          /* await ctx.telegram.sendPhoto(process.env.SECRET_CHAT_ID, images[0], {
-            caption: generateCaption(
-              first_name,
-              username,
-              id,
-              title,
-              description,
-              value
-            )
-          }); */
           logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
           ctx.reply(
             "Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato"
           );
+          return ctx.scene.leave();
         } catch (error) {
           logger.error(error);
           ctx.reply(
             "Errore, impossibile inviare il tuo messaggio. Riprova piu tardi"
           );
+          return ctx.scene.leave();
         }
-
-        //const imageUrl = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/getFile?file_id=${image_id}`;
-
-        return ctx.scene.leave();
-      case PREVIOUS_STEP:
-        await ctx.reply("Reinserisci Il prezzo");
-        return ctx.wizard.back();
+      case PAYPAL:
+        // If paypal is already present
+        if (ctx.wizard.state.paymentMethods.includes("Paypal")) {
+          // Remove it
+          ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
+            method => {
+              return method !== "Paypal";
+            }
+          );
+          logger.info(
+            `${ctx.from.username} removed Paypal as a payment method`
+          );
+        } else {
+          ctx.wizard.state.paymentMethods =
+            ctx.wizard.state.paymentMethods === undefined
+              ? ["Paypal"]
+              : [...ctx.wizard.state.paymentMethods, "Paypal"];
+          logger.info(`${ctx.from.username} added Paypal as a payment method`);
+        }
+        try {
+          await ctx.telegram.editMessageReplyMarkup(
+            ctx.callbackQuery.message.chat.id,
+            ctx.callbackQuery.message.message_id,
+            ctx.callbackQuery.inline_message_id,
+            {
+              inline_keyboard: generatePaymentsInlineKeyboard(
+                ctx.wizard.state.paymentMethods
+              )
+            }
+          );
+          return;
+        } catch (error) {
+          logger.error(error);
+          ctx.reply("Si è verificato un errore, ctxiprova piu tardi");
+          ctx.scene.leave();
+        }
+        return;
+      case HYPE:
+        // If hype is already present
+        if (ctx.wizard.state.paymentMethods.includes("Hype")) {
+          // Remove it
+          ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
+            method => {
+              return method !== "Hype";
+            }
+          );
+          logger.info(`${ctx.from.username} removed Hype as a payment method`);
+        } else {
+          ctx.wizard.state.paymentMethods =
+            ctx.wizard.state.paymentMethods === undefined
+              ? ["Hype"]
+              : [...ctx.wizard.state.paymentMethods, "Hype"];
+          logger.info(`${ctx.from.username} added Hype as a payment method`);
+        }
+        try {
+          await ctx.telegram.editMessageReplyMarkup(
+            ctx.callbackQuery.message.chat.id,
+            ctx.callbackQuery.message.message_id,
+            ctx.callbackQuery.inline_message_id,
+            {
+              inline_keyboard: generatePaymentsInlineKeyboard(
+                ctx.wizard.state.paymentMethods
+              )
+            }
+          );
+          return;
+        } catch (error) {
+          logger.error(error);
+          ctx.reply("Si è verificato un errore, ctxiprova piu tardi");
+          ctx.scene.leave();
+        }
+        return;
+      case CASH:
+        // If cash is already present
+        if (ctx.wizard.state.paymentMethods.includes("Contante")) {
+          // Remove it
+          ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
+            method => {
+              return method !== "Contante";
+            }
+          );
+          logger.info(`${ctx.from.username} removed Cash as a payment method`);
+        } else {
+          ctx.wizard.state.paymentMethods =
+            ctx.wizard.state.paymentMethods === undefined
+              ? ["Contante"]
+              : [...ctx.wizard.state.paymentMethods, "Contante"];
+          logger.info(`${ctx.from.username} added Cash as a payment method`);
+        }
+        try {
+          await ctx.telegram.editMessageReplyMarkup(
+            ctx.callbackQuery.message.chat.id,
+            ctx.callbackQuery.message.message_id,
+            ctx.callbackQuery.inline_message_id,
+            {
+              inline_keyboard: generatePaymentsInlineKeyboard(
+                ctx.wizard.state.paymentMethods
+              )
+            }
+          );
+          return;
+        } catch (error) {
+          logger.error(error);
+          ctx.reply("Si è verificato un errore, ctxiprova piu tardi");
+          ctx.scene.leave();
+        }
+        return;
+      case TRANSFER:
+        // If transfer is already present
+        if (ctx.wizard.state.paymentMethods.includes("Bonifico")) {
+          // Remove it
+          ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
+            method => {
+              return method !== "Bonifico";
+            }
+          );
+          logger.info(
+            `${ctx.from.username} removed Transfer as a payment method`
+          );
+        } else {
+          ctx.wizard.state.paymentMethods =
+            ctx.wizard.state.paymentMethods === undefined
+              ? ["Bonifico"]
+              : [...ctx.wizard.state.paymentMethods, "Bonifico"];
+          logger.info(
+            `${ctx.from.username} added Transfer as a payment method`
+          );
+        }
+        try {
+          await ctx.telegram.editMessageReplyMarkup(
+            ctx.callbackQuery.message.chat.id,
+            ctx.callbackQuery.message.message_id,
+            ctx.callbackQuery.inline_message_id,
+            {
+              inline_keyboard: generatePaymentsInlineKeyboard(
+                ctx.wizard.state.paymentMethods
+              )
+            }
+          );
+          return;
+        } catch (error) {
+          logger.error(error);
+          ctx.reply("Si è verificato un errore, riprova piu tardi");
+          ctx.scene.leave();
+        }
+        return;
+      case CLOSE_WIZARD:
+        ctx.scene.leave();
       default:
-        await ctx.reply("Bzzagrakkchhabz", "Bot is dead", "You killed the bot");
-        return ctx.scene.leave();
+        return;
+    }
+  },
+  // Step 10
+  async ctx => {
+    /* 
+      Validate user's response (only text callback_queries are accepted)
+      Based on callback_query make decisions:
+      If user confirms, ask for description, wait for user's input and then go to next step
+      If user wants to edit title, show prompt and repeat this step
+      If user wants to leave, exit current scene
+    */
+    logger.info(`${ctx.from.username} entered step 10 of ${SELL_ITEM_WIZARD}`);
+
+    if (!ctx.callbackQuery) {
+      const { message_id } = ctx.message;
+      // If user sends random message, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
+      return;
+    }
+    const {
+      title,
+      description,
+      images,
+      value,
+      paymentMethods
+    } = ctx.wizard.state;
+    const { username, first_name, id } = ctx.from;
+    try {
+      // generate array of inputMediaPhoto to be sent with sendMediaGroup
+      const media = images.map(file_id => {
+        return {
+          type: "photo",
+          media: file_id
+        };
+      });
+      // Append caption to first image of media array, telegram client will display it as caption for the whole album
+      media[0].caption = generateCaption(
+        first_name,
+        username,
+        id,
+        title,
+        description,
+        value,
+        paymentMethods
+      );
+      await ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
+      logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
+      ctx.reply(
+        "Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato"
+      );
+      return ctx.scene.leave();
+    } catch (error) {
+      logger.error(error);
+      ctx.reply(
+        "Errore, impossibile inviare il tuo messaggio. Riprova piu tardi"
+      );
+      return ctx.scene.leave();
     }
   }
 );
@@ -366,6 +598,47 @@ const prompt = Markup.inlineKeyboard([
   .oneTime()
   .resize()
   .extra();
+
+// This is the prompt when payment methods are requested
+const generatePaymentsInlineKeyboardMarkup = paymentMethods => {
+  const paymentMethodsPrompt = Markup.inlineKeyboard(
+    generatePaymentsInlineKeyboard(paymentMethods)
+  )
+    .oneTime()
+    .resize()
+    .extra();
+  return paymentMethodsPrompt;
+};
+
+// This is just the markup of the payment inline keyboard
+const generatePaymentsInlineKeyboard = paymentMethods => {
+  return [
+    [
+      Markup.callbackButton(
+        `${paymentMethods.includes("Paypal") ? checkMark : ""} Paypal`,
+        PAYPAL
+      ),
+      Markup.callbackButton(
+        `${paymentMethods.includes("Hype") ? checkMark : ""} Hype`,
+        HYPE
+      )
+    ],
+    [
+      Markup.callbackButton(
+        `${paymentMethods.includes("Contante") ? checkMark : ""} Contante`,
+        CASH
+      ),
+      Markup.callbackButton(
+        `${paymentMethods.includes("Bonifico") ? checkMark : ""} Bonifico`,
+        TRANSFER
+      )
+    ],
+    [
+      Markup.callbackButton("Annulla", CLOSE_WIZARD),
+      Markup.callbackButton("Avanti", NEXT_STEP)
+    ]
+  ];
+};
 
 sellItemWizard.leave(ctx =>
   ctx.reply(
