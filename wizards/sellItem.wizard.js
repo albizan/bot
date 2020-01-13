@@ -19,7 +19,14 @@ const { generateCaption } = require("../helper");
 const logger = require("../logger");
 
 // Import emojis
-const { package, memo, moneyBag, checkMark } = require("../emoji");
+const {
+  package,
+  memo,
+  moneyBag,
+  checkMark,
+  back,
+  forward
+} = require("../emoji");
 
 // A wizard is a special type of scene
 const sellItemWizard = new WizardScene(
@@ -151,7 +158,6 @@ const sellItemWizard = new WizardScene(
     // Update wizard state with given validated description
     ctx.wizard.state.description = text;
 
-    logger.info(`${ctx.from.username} inserted description:`, text);
     try {
       await ctx.reply(`${memo} Descrizione: ${text}`, prompt);
       return ctx.wizard.next();
@@ -188,12 +194,11 @@ const sellItemWizard = new WizardScene(
         );
         return ctx.scene.leave();
       case NEXT_STEP:
-        logger.info(`${ctx.from.username} confirmed description`);
         await ctx.reply(
-          "<b>Invia una o piu foto del prodotto, quando hai finito digita /avanti</b>",
-          {
-            parse_mode: "HTML"
-          }
+          "Invia una o piu foto del prodotto, quando hai finito premi sul pulsante 'Avanti'",
+          Markup.keyboard(["Avanti"])
+            .resize()
+            .extra()
         );
         return ctx.wizard.next();
       case PREVIOUS_STEP:
@@ -221,7 +226,7 @@ const sellItemWizard = new WizardScene(
       return;
     }
 
-    if (ctx.message.text === "/avanti") {
+    if (ctx.message.text === "Avanti") {
       if (!ctx.wizard.state.images) {
         ctx.reply("Inserisci almeno un immagine");
         return;
@@ -528,71 +533,14 @@ const sellItemWizard = new WizardScene(
       default:
         return;
     }
-  },
-  // Step 10
-  async ctx => {
-    /* 
-      Validate user's response (only text callback_queries are accepted)
-      Based on callback_query make decisions:
-      If user confirms, ask for description, wait for user's input and then go to next step
-      If user wants to edit title, show prompt and repeat this step
-      If user wants to leave, exit current scene
-    */
-    logger.info(`${ctx.from.username} entered step 10 of ${SELL_ITEM_WIZARD}`);
-
-    if (!ctx.callbackQuery) {
-      const { message_id } = ctx.message;
-      // If user sends random message, delete it in order to avoid chat cluttering
-      ctx.deleteMessage(message_id);
-      return;
-    }
-    const {
-      title,
-      description,
-      images,
-      value,
-      paymentMethods
-    } = ctx.wizard.state;
-    const { username, first_name, id } = ctx.from;
-    try {
-      // generate array of inputMediaPhoto to be sent with sendMediaGroup
-      const media = images.map(file_id => {
-        return {
-          type: "photo",
-          media: file_id
-        };
-      });
-      // Append caption to first image of media array, telegram client will display it as caption for the whole album
-      media[0].caption = generateCaption(
-        first_name,
-        username,
-        id,
-        title,
-        description,
-        value,
-        paymentMethods
-      );
-      await ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
-      logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
-      ctx.reply(
-        "Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato"
-      );
-      return ctx.scene.leave();
-    } catch (error) {
-      logger.error(error);
-      ctx.reply(
-        "Errore, impossibile inviare il tuo messaggio. Riprova piu tardi"
-      );
-      return ctx.scene.leave();
-    }
   }
 );
 
 const prompt = Markup.inlineKeyboard([
   [
-    Markup.callbackButton("Edit", PREVIOUS_STEP),
+    Markup.callbackButton(`${back} Modifica`, PREVIOUS_STEP),
     Markup.callbackButton("Home", CLOSE_WIZARD),
-    Markup.callbackButton("Avanti", NEXT_STEP)
+    Markup.callbackButton(`Avanti ${forward}`, NEXT_STEP)
   ]
 ])
   .oneTime()
