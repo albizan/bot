@@ -32,7 +32,7 @@ const {
 const sellItemWizard = new WizardScene(
   // Wizard's name
   SELL_ITEM_WIZARD,
-  // Step 1 of Wizard - Ask Title
+  // Step 1 of Wizard - Ask For Title
   async ctx => {
     /* 
       Initialize wizard's state for current wizard operation, this will be automatically deleted when leaving the wizard with ctx.scene.leave()
@@ -40,10 +40,14 @@ const sellItemWizard = new WizardScene(
       Wait for user's input and then go to next step
     */
     logger.info(`${ctx.from.username} entered ${SELL_ITEM_WIZARD}`);
-    ctx.wizard.state.paymentMethods = [];
-    await ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", {
-      parse_mode: "HTML"
-    });
+    ctx.wizard.state = {
+      title: null,
+      description: null,
+      images: [],
+      value: null,
+      paymentMethods: []
+    };
+    await ctx.reply("Inserisci il titolo dell'annuncio");
     return ctx.wizard.next();
   },
   // Step 2 of Wizard - Title Validation
@@ -75,30 +79,33 @@ const sellItemWizard = new WizardScene(
     }
     // Update wizard state with given validated title
     ctx.wizard.state.title = text;
-
-    logger.info(`${ctx.from.username} inserted title:`, text);
     try {
-      await ctx.reply(`${package} Titolo: ${text}`, prompt);
+      ctx.reply(`${package} Titolo: ${text}`, prompt);
       return ctx.wizard.next();
     } catch (error) {
       logger.error({ error });
-      return;
+      ctx.reply("Errore, riprovare più tardi");
+      return ctx.scene.leave();
     }
   },
   // Step 3 of Wizard - Title Confirmation and Ask For Description
   async ctx => {
     /*
-      Validate user's response (only text callback_queries are accepted)
+      Validate user's response (only callback_queries are accepted)
       Based on callback_query make decisions:
       If user confirms, ask for description, wait for user's input and then go to next step
-      If user wants to edit title, show prompt and repeat this step
+      If user wants to edit title, re-show title prompt and repeat this step
       If user wants to leave, exit current scene
     */
     logger.info(`${ctx.from.username} entered step 3 of ${SELL_ITEM_WIZARD}`);
+
+    // If not callbackQuery, delete message if possible
     if (!ctx.callbackQuery) {
-      const { message_id } = ctx.message;
-      // If user sends random message, delete it in order to avoid chat cluttering
-      ctx.deleteMessage(message_id);
+      if (ctx.message) {
+        const { message_id } = ctx.message;
+        // If user sends random message, delete it in order to avoid chat cluttering
+        ctx.deleteMessage(message_id);
+      }
       return;
     }
     const { data } = ctx.callbackQuery;
@@ -109,15 +116,10 @@ const sellItemWizard = new WizardScene(
         );
         return ctx.scene.leave();
       case NEXT_STEP:
-        logger.info(`${ctx.from.username} confirmed title`);
-        await ctx.reply("<b>Inserisci una descrizione</b>", {
-          parse_mode: "HTML"
-        });
+        await ctx.reply("Inserisci una descrizione");
         return ctx.wizard.next();
       case PREVIOUS_STEP:
-        await ctx.reply("<b>Reinserisci il titolo dell'annuncio</b>", {
-          parse_mode: "HTML"
-        });
+        await ctx.reply("Reinserisci il titolo dell'annuncio");
         return ctx.wizard.back();
       default:
         await ctx.reply("Bzzagrakkchhabz, Bot is dead, You killed the bot");
@@ -163,7 +165,8 @@ const sellItemWizard = new WizardScene(
       return ctx.wizard.next();
     } catch (error) {
       logger.error({ error });
-      return;
+      ctx.reply("Errore, riprovare più tardi");
+      return ctx.scene.leave();
     }
   },
   // Step 5 of Wizard - Description Confirmation and Ask For Product's Images
@@ -196,15 +199,14 @@ const sellItemWizard = new WizardScene(
       case NEXT_STEP:
         await ctx.reply(
           "Invia una o piu foto del prodotto, quando hai finito premi sul pulsante 'Avanti'",
-          Markup.keyboard(["Avanti"])
+          Markup.keyboard(["Avanti", "Annulla"])
+            .oneTime()
             .resize()
             .extra()
         );
         return ctx.wizard.next();
       case PREVIOUS_STEP:
-        await ctx.reply("<b>Reinserisci la descrizione dell'annuncio</b>", {
-          parse_mode: "HTML"
-        });
+        await ctx.reply("Reinserisci la descrizione dell'annuncio");
         return ctx.wizard.back();
       default:
         await ctx.reply("Bzzagrakkchhabz, Bot is dead, You killed the bot");
@@ -228,13 +230,21 @@ const sellItemWizard = new WizardScene(
 
     if (ctx.message.text === "Avanti") {
       if (!ctx.wizard.state.images) {
-        ctx.reply("Inserisci almeno un immagine");
+        ctx.reply(
+          "Inserisci almeno un immagine",
+          Markup.keyboard(["Avanti", "Annulla"])
+            .oneTime()
+            .resize()
+            .extra()
+        );
         return;
       }
       await ctx.reply(
         "Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)"
       );
       return ctx.wizard.next();
+    } else if (ctx.message.text === "Annulla") {
+      return ctx.scene.leave();
     }
 
     if (!ctx.message.photo) {
