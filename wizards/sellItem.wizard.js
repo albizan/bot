@@ -200,7 +200,7 @@ const sellItemWizard = new WizardScene(
         await ctx.reply(
           "Invia una o piu foto del prodotto, quando hai finito premi sul pulsante 'Avanti'",
           Markup.keyboard(["Avanti", "Annulla"])
-            .oneTime()
+          .oneTime()
             .resize()
             .extra()
         );
@@ -240,7 +240,7 @@ const sellItemWizard = new WizardScene(
         return;
       }
       await ctx.reply(
-        "Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)"
+        "Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)", {reply_markup: { remove_keyboard: true}}
       );
       return ctx.wizard.next();
     } else if (ctx.message.text === "Annulla") {
