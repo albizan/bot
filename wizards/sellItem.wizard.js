@@ -313,9 +313,9 @@ const sellItemWizard = new WizardScene(
       return;
     }
     const { data } = ctx.callbackQuery;
-    const { paymentMethods } = ctx.wizard.state;
+    ctx.wizard.state.paymentMethods = [];
     const paymentMethodsPrompt = generatePaymentsInlineKeyboardMarkup(
-      paymentMethods
+      ctx.wizard.state.paymentMethods
     );
     switch (data) {
       case CLOSE_WIZARD:
