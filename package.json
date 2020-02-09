@@ -11,11 +11,11 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "nodemon": "^2.0.2",
-    "pino": "^5.15.0",
-    "telegraf": "^3.35.0"
+    "pino": "^5.16.0",
+    "pino-pretty": "^3.5.0",
+    "telegraf": "^3.36.0"
   },
   "devDependencies": {
-    "pino-pretty": "^3.5.0"
+    "nodemon": "^2.0.2"
   }
 }
