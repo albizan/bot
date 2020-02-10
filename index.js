@@ -1,30 +1,35 @@
-const dotenv = require("dotenv");
-dotenv.config();
+const dotenv = require('dotenv');
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+if (process.env.NODE_ENV === 'development') {
+  dotenv.config();
+}
 
-const Telegraf = require("telegraf");
+const Telegraf = require('telegraf');
 // Import types
-const { SELL_ITEM, SEEK_ITEM } = require("./types/callbacks.types");
-const { SELL_ITEM_WIZARD, SEEK_ITEM_WIZARD } = require("./types/scenes.types");
+const { SELL_ITEM, SEEK_ITEM } = require('./types/callbacks.types');
+const { SELL_ITEM_WIZARD, SEEK_ITEM_WIZARD } = require('./types/scenes.types');
 
 // Import Wizards
-const sellItemWizard = require("./wizards/sellItem.wizard");
+const sellItemWizard = require('./wizards/sell');
+
+const chat = require('./scenes/chat.scene');
 
 // Import logger
-const logger = require("./logger");
-
-// Import Emojis
-const { package } = require("./emoji");
+const logger = require('./logger');
 
 const { Markup, Stage, session } = Telegraf;
 
 // Compose stage with given scenes
-const stage = new Stage([sellItemWizard]);
+const stage = new Stage([chat, sellItemWizard]);
+
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
 const startMessage = Markup.inlineKeyboard([
   [
-    Markup.callbackButton("Ricerca", SEEK_ITEM),
-    Markup.callbackButton("Vendita", SELL_ITEM)
-  ]
+    Markup.callbackButton('Ricerca', SEEK_ITEM),
+    Markup.callbackButton('Vendita', SELL_ITEM),
+  ],
+  [Markup.callbackButton('Chatta con gli admin', 'admin')],
 ])
   .oneTime()
   .resize()
@@ -40,7 +45,7 @@ bot.start(ctx => {
   // When user starts bot, show welcome message in private chat and asks for type of action
   ctx.telegram.sendMessage(
     id,
-    `Benvenuto nel mercatino, ${first_name}`,
+    `Ciao ${first_name}\nBenvenuto nel mercatino del gruppo "PC Building Italia"`,
     startMessage
   );
 });
@@ -48,20 +53,31 @@ bot.start(ctx => {
 bot.action(SELL_ITEM, Stage.enter(SELL_ITEM_WIZARD));
 
 bot.action(SEEK_ITEM, ctx => {
-  ctx.reply("Questa funzionalità non è ancora disponibile", startMessage);
+  // Delete previous inline message to avoid cluttering the chat
+  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
+  ctx.reply('Questa funzionalità non è ancora disponibile', startMessage);
 });
 
-bot.command("s", ctx => {
-  ctx.telegram.sendMessage(
-    process.env.SECRET_CHAT_ID,
-    ctx.message.text.replace("/s", "")
-  );
-});
+bot.action('admin', Stage.enter('chat'));
 
 bot.help(ctx => {
-  ctx.reply("Premi /start per iniziare la procedura");
+  ctx.reply('Premi /start per iniziare la procedura');
+});
+bot.on('message', ctx => {
+  // If admin replies to a user's forwarded message, bot sends reply to that user
+  if (ctx.message.reply_to_message && ctx.message.reply_to_message.text) {
+    const id = ctx.message.reply_to_message.text.split('\n')[0];
+    if (parseInt(id)) {
+      try {
+        ctx.telegram.sendMessage(id, ctx.message.text);
+      } catch (error) {
+        logger.error(error);
+      }
+    }
+  }
 });
 bot.launch();
+logger.info('Bot started');
 
 /* 
   Inizio -> saluti e fai scelta vendere o cercare
