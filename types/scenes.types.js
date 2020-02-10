@@ -1,2 +1,2 @@
-exports.SELL_ITEM_WIZARD = "sell_item_wizard";
-exports.SEEK_ITEM_WIZARD = "seek_item_wizard";
+exports.SELL_ITEM_WIZARD = 'Sell Item Wizard';
+exports.SEEK_ITEM_WIZARD = 'Search Item Wizard';
