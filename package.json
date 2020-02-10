@@ -1,7 +1,7 @@
 {
   "name": "nasbot",
   "version": "1.0.0",
-  "description": "BOT made with telegraf nodejs framework. Used to manage HW and tech sales",
+  "description": "Telegram Bot made with telegraf nodejs framework. Used to manage pc components sales at hardare flea market",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
