@@ -31,7 +31,7 @@ const generateCaption = (
     \n\n${memo} Descrizione ${memo}\n${description}
     \n\n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€
     \n\n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(' ')}
-    \n\n${silhouette} Contatto ${silhouette}\n${first_name} (@${username} - ${id})`;
+    \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
 };
 
 const getSellItemWizardPrompt = () => {
@@ -47,15 +47,9 @@ const getSellItemWizardPrompt = () => {
     .extra();
 };
 
-// Keyboard that shows payment methods
-const getPaymentMethodsPrompt = paymentMethods => {
-  const paymentMethodsPrompt = Markup.inlineKeyboard(
-    generatePaymentsInlineKeyboard(paymentMethods)
-  )
-    .oneTime()
-    .resize()
-    .extra();
-  return paymentMethodsPrompt;
+// Return the reply_markup with an inline keyboard used to choose payment methods
+const getPaymentMethodsMenuMarkup = paymentMethods => {
+  return Markup.inlineKeyboard(generatePaymentsInlineKeyboard(paymentMethods));
 };
 
 // This is just the markup of the payment inline keyboard
@@ -91,6 +85,6 @@ const generatePaymentsInlineKeyboard = paymentMethods => {
 module.exports = {
   generateCaption,
   getSellItemWizardPrompt,
-  getPaymentMethodsPrompt,
+  getPaymentMethodsMenuMarkup,
   generatePaymentsInlineKeyboard,
 };
