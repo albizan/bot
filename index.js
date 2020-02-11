@@ -65,14 +65,15 @@ bot.help(ctx => {
 });
 bot.on('message', ctx => {
   // If admin replies to a user's forwarded message, bot sends reply to that user
-  if (ctx.message.reply_to_message && ctx.message.reply_to_message.text) {
-    const id = ctx.message.reply_to_message.text.split('\n')[0];
-    if (parseInt(id)) {
-      try {
-        ctx.telegram.sendMessage(id, ctx.message.text);
-      } catch (error) {
-        logger.error(error);
-      }
+  if (
+    ctx.message.reply_to_message &&
+    ctx.message.reply_to_message.forward_from
+  ) {
+    const { id } = ctx.message.reply_to_message.forward_from;
+    try {
+      ctx.telegram.sendMessage(id, ctx.message.text);
+    } catch (error) {
+      ctx.reply('Impossibile inviare messaggio');
     }
   }
 });
