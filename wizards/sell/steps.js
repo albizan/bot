@@ -2,9 +2,8 @@ const Markup = require('telegraf/markup');
 const logger = require('../../logger');
 const {
   getSellItemWizardPrompt,
-  getPaymentMethodsPrompt,
+  getPaymentMethodsMenuMarkup,
   generateCaption,
-  generatePaymentsInlineKeyboard,
 } = require('../../helper');
 
 // Import sell item wizard type
@@ -303,10 +302,12 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
     case NEXT_STEP:
       logger.info(`${ctx.from.username} confirmed value`);
       ctx.wizard.state.paymentMethods = [];
-      const paymentMethodsPrompt = getPaymentMethodsPrompt(
+      const paymentMethodsPrompt = getPaymentMethodsMenuMarkup(
         ctx.wizard.state.paymentMethods
       );
-      ctx.reply('Seleziona i metodi di pagamento', paymentMethodsPrompt);
+      ctx.reply('Seleziona i metodi di pagamento', {
+        reply_markup: paymentMethodsPrompt,
+      });
       return ctx.wizard.next();
     case PREVIOUS_STEP:
       await ctx.reply('Reinserisci Il prezzo');
@@ -361,6 +362,7 @@ const updatePaymentMethods = async ctx => {
           value,
           paymentMethods
         );
+        ctx.telegram.sendMediaGroup(ctx.from.id, media);
         await ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
         logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
         ctx.reply(
@@ -397,11 +399,7 @@ const updatePaymentMethods = async ctx => {
           ctx.callbackQuery.message.chat.id,
           ctx.callbackQuery.message.message_id,
           ctx.callbackQuery.inline_message_id,
-          {
-            inline_keyboard: generatePaymentsInlineKeyboard(
-              ctx.wizard.state.paymentMethods
-            ),
-          }
+          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
       } catch (error) {
@@ -432,11 +430,7 @@ const updatePaymentMethods = async ctx => {
           ctx.callbackQuery.message.chat.id,
           ctx.callbackQuery.message.message_id,
           ctx.callbackQuery.inline_message_id,
-          {
-            inline_keyboard: generatePaymentsInlineKeyboard(
-              ctx.wizard.state.paymentMethods
-            ),
-          }
+          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
       } catch (error) {
@@ -467,11 +461,7 @@ const updatePaymentMethods = async ctx => {
           ctx.callbackQuery.message.chat.id,
           ctx.callbackQuery.message.message_id,
           ctx.callbackQuery.inline_message_id,
-          {
-            inline_keyboard: generatePaymentsInlineKeyboard(
-              ctx.wizard.state.paymentMethods
-            ),
-          }
+          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
       } catch (error) {
@@ -504,11 +494,7 @@ const updatePaymentMethods = async ctx => {
           ctx.callbackQuery.message.chat.id,
           ctx.callbackQuery.message.message_id,
           ctx.callbackQuery.inline_message_id,
-          {
-            inline_keyboard: generatePaymentsInlineKeyboard(
-              ctx.wizard.state.paymentMethods
-            ),
-          }
+          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
       } catch (error) {
