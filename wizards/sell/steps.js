@@ -1,7 +1,7 @@
 const Markup = require('telegraf/markup');
 const logger = require('../../logger');
 const {
-  getSellItemWizardPrompt,
+  sellItemMenuMarkup,
   getPaymentMethodsMenuMarkup,
   generateCaption,
 } = require('../../helper');
@@ -21,14 +21,7 @@ const {
 } = require('../../types/callbacks.types');
 
 // Import emojis
-const {
-  package,
-  memo,
-  moneyBag,
-  checkMark,
-  back,
-  forward,
-} = require('../../emoji');
+const { package, memo, moneyBag } = require('../../emoji');
 
 /*
   Step 1 of Wizard - Ask For Title
@@ -36,11 +29,10 @@ const {
   The state will be automatically deleted when leaving the wizard with ctx.scene.leave()
   Prompt user to write title
 */
-const askForTitle = async ctx => {
+const askForTitle = ctx => {
   logger.info(`${ctx.from.username} entered ${SELL_ITEM_WIZARD}`);
   ctx.wizard.state = {};
-  logger.info('Current State:', ctx.wizard.state);
-  await ctx.reply("Inserisci il titolo dell'annuncio");
+  ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", { parse_mode: 'HTML' });
   return ctx.wizard.next();
 };
 
@@ -71,10 +63,11 @@ const validateTitle = async ctx => {
 
   // Update wizard state with given validated title
   ctx.wizard.state.title = text;
-  logger.info('Current State:', ctx.wizard.state);
 
   // Ask for confirmation
-  await ctx.reply(`${package} Titolo: ${text}`, getSellItemWizardPrompt());
+  await ctx.reply(`${package} Titolo: ${text}`, {
+    reply_markup: sellItemMenuMarkup,
+  });
   return ctx.wizard.next();
 };
 
@@ -88,7 +81,6 @@ const validateTitle = async ctx => {
 */
 const confirmTitleAndAskForDescription = async ctx => {
   logger.info(`${ctx.from.username} entered step 3 of ${SELL_ITEM_WIZARD}`);
-  logger.info('Current State:', ctx.wizard.state);
 
   // If not callbackQuery, delete message if possible
   if (!ctx.callbackQuery) {
@@ -124,7 +116,6 @@ const confirmTitleAndAskForDescription = async ctx => {
 */
 const validateDescription = async ctx => {
   logger.info(`${ctx.from.username} entered step 4 of ${SELL_ITEM_WIZARD}`);
-  logger.info('Current State:', ctx.wizard.state);
 
   // Check if user sent a message and not a callback_query, if it is a message check if it is a text and not a GIF/Sticker
   if (!ctx.message) {
@@ -146,10 +137,11 @@ const validateDescription = async ctx => {
 
   // Update wizard state with given validated description
   ctx.wizard.state.description = text;
-  logger.info('Current State:', ctx.wizard.state);
 
   // Ask for confirmation
-  await ctx.reply(`${memo} Descrizione: ${text}`, getSellItemWizardPrompt());
+  await ctx.reply(`${memo} Descrizione: ${text}`, {
+    reply_markup: sellItemMenuMarkup,
+  });
   return ctx.wizard.next();
 };
 
@@ -163,7 +155,6 @@ const validateDescription = async ctx => {
 */
 const confirmDescriptionAndAskForImages = async ctx => {
   logger.info(`${ctx.from.username} entered step 5 of ${SELL_ITEM_WIZARD}`);
-  logger.info('Current State:', ctx.wizard.state);
 
   if (!ctx.callbackQuery) {
     if (ctx.message) {
@@ -202,7 +193,6 @@ const confirmDescriptionAndAskForImages = async ctx => {
 */
 const validateImagesAndAskForPrice = async ctx => {
   logger.info(`${ctx.from.username} entered step 6 of ${SELL_ITEM_WIZARD}`);
-  logger.info('Current State:', ctx.wizard.state);
 
   // User did not send an image
   if (!ctx.message) {
@@ -254,7 +244,6 @@ const validateImagesAndAskForPrice = async ctx => {
 */
 const priceValidation = async ctx => {
   logger.info(`${ctx.from.username} entered step 7 of ${SELL_ITEM_WIZARD}`);
-  logger.info('Current State:', ctx.wizard.state);
 
   if (!ctx.message) {
     return;
@@ -269,10 +258,9 @@ const priceValidation = async ctx => {
   const { text } = ctx.message;
   // Convert string into a floating point number
   ctx.wizard.state.value = parseFloat(text.replace(',', '.'));
-  await ctx.reply(
-    `${moneyBag} Prezzo: ${ctx.wizard.state.value}€`,
-    getSellItemWizardPrompt()
-  );
+  await ctx.reply(`${moneyBag} Prezzo: ${ctx.wizard.state.value}€`, {
+    reply_markup: sellItemMenuMarkup,
+  });
   return ctx.wizard.next();
 };
 
@@ -286,7 +274,6 @@ const priceValidation = async ctx => {
 */
 const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
   logger.info(`${ctx.from.username} entered step 8 of ${SELL_ITEM_WIZARD}`);
-  logger.info('Current State:', ctx.wizard.state);
 
   if (!ctx.callbackQuery) {
     const { message_id } = ctx.message;
