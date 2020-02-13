@@ -40,18 +40,15 @@ const generateCaption = (
     \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
 };
 
-const getSellItemWizardPrompt = () => {
-  return Markup.inlineKeyboard([
-    [
-      Markup.callbackButton(`Modifica`, PREVIOUS_STEP),
-      Markup.callbackButton('Esci', CLOSE_WIZARD),
-      Markup.callbackButton(`Avanti`, NEXT_STEP),
-    ],
-  ])
-    .oneTime()
-    .resize()
-    .extra();
-};
+const sellItemMenuMarkup = Markup.inlineKeyboard([
+  [
+    Markup.callbackButton(`Modifica`, PREVIOUS_STEP),
+    Markup.callbackButton('Esci', CLOSE_WIZARD),
+    Markup.callbackButton(`Avanti`, NEXT_STEP),
+  ],
+])
+  .oneTime()
+  .resize();
 
 // Return the reply_markup with an inline keyboard used to choose payment methods
 const getPaymentMethodsMenuMarkup = paymentMethods => {
@@ -102,7 +99,7 @@ const startMenuMarkup = Markup.inlineKeyboard([
 module.exports = {
   startMenuMarkup,
   generateCaption,
-  getSellItemWizardPrompt,
+  sellItemMenuMarkup,
   getPaymentMethodsMenuMarkup,
   generatePaymentsInlineKeyboard,
 };
