@@ -1,7 +1,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('users', function(table) {
     table
-      .string('id', 8)
+      .string('id')
       .notNullable()
       .primary();
     table.boolean('muted').notNullable();
