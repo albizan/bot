@@ -2,7 +2,8 @@ FROM node:latest
 WORKDIR /code
 COPY package*.json ./
 RUN npm install
-RUN npm ci --only=production
+RUN npm i -g knex
+# RUN npm ci --only=production
 COPY . .
-EXPOSE 80
+# EXPOSE 80
 CMD node index.js
