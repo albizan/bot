@@ -5,6 +5,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const Telegraf = require('telegraf');
+const knex = require('./db');
 // Import types
 const { SELL_ITEM, SEEK_ITEM } = require('./types/callbacks.types');
 const { SELL_ITEM_WIZARD, SEEK_ITEM_WIZARD } = require('./types/scenes.types');
