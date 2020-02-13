@@ -5,5 +5,4 @@ RUN npm install
 RUN npm i -g knex
 # RUN npm ci --only=production
 COPY . .
-# EXPOSE 80
 CMD node index.js
