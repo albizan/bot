@@ -121,6 +121,18 @@ bot.on('message', ctx => {
     } catch (error) {
       ctx.reply('Impossibile inviare messaggio');
     }
+  } else if (
+    ctx.message.reply_to_message &&
+    ctx.message.reply_to_message.caption
+  ) {
+    const userId = ctx.message.reply_to_message.caption.split('ID: ')[1];
+    try {
+      ctx.telegram.sendMessage(userId, ctx.message.text);
+    } catch (error) {
+      ctx.reply('Impossibile inviare messaggio');
+    } finally {
+      return;
+    }
   }
 });
 bot.launch();
