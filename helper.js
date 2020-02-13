@@ -1,4 +1,10 @@
 const Markup = require('telegraf/markup');
+
+const {
+  SELL_ITEM,
+  SEEK_ITEM,
+  SUPPORT_CHAT,
+} = require('./types/callbacks.types');
 const {
   package,
   memo,
@@ -82,7 +88,19 @@ const generatePaymentsInlineKeyboard = paymentMethods => {
   ];
 };
 
+//
+const startMenuMarkup = Markup.inlineKeyboard([
+  [
+    Markup.callbackButton('Ricerca', SEEK_ITEM),
+    Markup.callbackButton('Vendita', SELL_ITEM),
+  ],
+  [Markup.callbackButton('Chatta con gli admin', SUPPORT_CHAT)],
+])
+  .oneTime()
+  .resize();
+
 module.exports = {
+  startMenuMarkup,
   generateCaption,
   getSellItemWizardPrompt,
   getPaymentMethodsMenuMarkup,
