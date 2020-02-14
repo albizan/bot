@@ -85,7 +85,6 @@ const generatePaymentsInlineKeyboard = paymentMethods => {
   ];
 };
 
-//
 const startMenuMarkup = Markup.inlineKeyboard([
   [
     Markup.callbackButton('Ricerca', SEEK_ITEM),
