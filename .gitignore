@@ -123,3 +123,4 @@ temp/
 .directory
 
 load-env.sh
+wait-for-it.sh
