@@ -39,7 +39,8 @@ supportChat.leave(async ctx => {
     }
   );
 });
-supportChat.hears(/quit/gi, ctx => ctx.scene.leave());
+supportChat.command('quit', ctx => ctx.scene.leave());
+
 supportChat.on('message', async ctx => {
   knex('users')
     .where({ id: ctx.from.id })
@@ -49,6 +50,10 @@ supportChat.on('message', async ctx => {
           process.env.SECRET_CHAT_ID,
           ctx.from.id,
           ctx.message.message_id
+        );
+        ctx.telegram.sendMessage(
+          process.env.SECRET_CHAT_ID,
+          `Messaggio inoltrato da ${ctx.from.id}`
         );
       }
     });
