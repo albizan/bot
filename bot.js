@@ -58,7 +58,10 @@ bot.start(ctx => {
 });
 
 // Handle middlewares for callback_data
-bot.action(SELL_ITEM, Stage.enter(SELL_ITEM_WIZARD));
+bot.action(SELL_ITEM, ctx => {
+  ctx.answerCbQuery('Completa il tuo annuncio');
+  ctx.scene.enter(SELL_ITEM_WIZARD);
+});
 bot.action(SEEK_ITEM, ctx => {
   // Delete previous inline message to avoid cluttering the chat
   ctx.deleteMessage(ctx.callbackQuery.message.message_id);
@@ -66,7 +69,10 @@ bot.action(SEEK_ITEM, ctx => {
     reply_markup: startMenuMarkup,
   });
 });
-bot.action(SUPPORT_CHAT, Stage.enter(SUPPORT_CHAT_SCENE));
+bot.action(SUPPORT_CHAT, ctx => {
+  ctx.answerCbQuery('Ora puoi parlare con gli admin');
+  ctx.scene.enter(SUPPORT_CHAT_SCENE);
+});
 
 // Administration Commands
 bot.command('mute', ctx => {
