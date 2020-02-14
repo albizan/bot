@@ -8,7 +8,6 @@ const {
 } = require('./types/callbacks.types');
 const {
   SELL_ITEM_WIZARD,
-  SEEK_ITEM_WIZARD,
   SUPPORT_CHAT_SCENE,
 } = require('./types/scenes.types');
 
@@ -26,6 +25,9 @@ const { Stage, session } = Telegraf;
 // import markups
 const { startMenuMarkup } = require('./helper');
 
+// Define administrators, id must be numbers and not strings
+const admins = process.env.ADMINS.split(',').map(admin => parseInt(admin));
+
 // Compose stage with given scenes
 const stage = new Stage([supportChat, sellItemWizard]);
 
@@ -35,12 +37,13 @@ bot.use(session());
 bot.use(stage.middleware());
 
 bot.start(ctx => {
+  console.log(admins);
   const { first_name, id, username } = ctx.from;
-  logger.info(`${username} started Nas BOT`);
+  logger.info(`${username} started the Bot`);
 
   // Save new user to the database
   knex('users')
-    .insert({ id, muted: false })
+    .insert({ id, username, name: first_name, muted: false })
     .then(`${id} added to the database`)
     .catch(err => logger.error(err.detail));
 
@@ -65,20 +68,23 @@ bot.action(SEEK_ITEM, ctx => {
 });
 bot.action(SUPPORT_CHAT, Stage.enter(SUPPORT_CHAT_SCENE));
 
+// Administration Commands
 bot.command('mute', ctx => {
-  logger.info('Mute command');
-  console.log(ctx.message);
-  if (
-    ctx.message.reply_to_message &&
-    ctx.message.reply_to_message.forward_from
-  ) {
-    const { id } = ctx.message.reply_to_message.forward_from;
-    logger.info('Mute command 2', id);
+  const { id } = ctx.from;
+  if (!admins.includes(id)) {
+    return;
+  }
+  if (!ctx.message.reply_to_message) {
+    return;
+  }
+  const { forward_from } = ctx.message.reply_to_message;
+  if (forward_from) {
+    const { id } = forward_from;
     knex('users')
       .where({ id })
       .update({ muted: 'true' })
       .then(rows => {
-        logger.info(`${id} è stato mutato`);
+        logger.info(`${id} is now muted`);
         ctx.reply(`${id} è stato mutato`);
       })
       .catch(err => logger.error(err));
@@ -88,6 +94,7 @@ bot.command('mute', ctx => {
         '<b>Da questo momento non potrai piu inviare messaggi agli admin</b>',
         {
           parse_mode: 'HTML',
+          reply_markup: startMenuMarkup,
         }
       );
     } catch (error) {
@@ -96,11 +103,16 @@ bot.command('mute', ctx => {
   }
 });
 bot.command('unmute', ctx => {
-  if (
-    ctx.message.reply_to_message &&
-    ctx.message.reply_to_message.forward_from
-  ) {
-    const { id } = ctx.message.reply_to_message.forward_from;
+  const { id } = ctx.from;
+  if (!admins.includes(id)) {
+    return;
+  }
+  if (!ctx.message.reply_to_message) {
+    return;
+  }
+  const { forward_from } = ctx.message.reply_to_message;
+  if (forward_from) {
+    const { id } = forward_from;
     knex('users')
       .where({ id })
       .update({ muted: 'false' })
@@ -110,6 +122,18 @@ bot.command('unmute', ctx => {
       })
       .catch(err => logger.error(err));
   }
+});
+bot.command('users', ctx => {
+  const { id } = ctx.from;
+  if (!admins.includes(id)) {
+    return;
+  }
+  knex('users').then(rows => {
+    rows.map(row => {
+      const { id } = row;
+      ctx.reply(id);
+    });
+  });
 });
 
 bot.on('message', ctx => {
@@ -127,6 +151,7 @@ bot.on('message', ctx => {
       ctx.reply('Impossibile inviare messaggio');
     }
   } else if (caption) {
+    // Get user id from caption
     const userId = caption.split('ID: ')[1];
     try {
       ctx.telegram.sendMessage(userId, text);
@@ -137,12 +162,3 @@ bot.on('message', ctx => {
 });
 
 module.exports = bot;
-
-/* 
-  Inizio -> saluti e fai scelta vendere o cercare
-  In base alla scelta, guardo la callback_query e entro nella wizarScene desiderata
-  Ogni wizardScene ha un suo stato -> ctx.wizard.state che si pulisce quando si esce dalla scena
-  una scena e come una stanza dove il bot risponde solo ai comandi di quella determinata stanza, ignorando tutto quello che non è nel codice della stanza
-  Lo stage serve solo per nettere insieme tutte le scene
-  si entra in una scena con ctx.scene.enter(sceneId) questo scene viene aggiunto al ctx grazie al middleware dello stage
-*/
