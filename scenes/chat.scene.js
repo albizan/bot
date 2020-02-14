@@ -40,7 +40,6 @@ supportChat.leave(async ctx => {
   );
 });
 supportChat.command('quit', ctx => ctx.scene.leave());
-
 supportChat.on('message', async ctx => {
   knex('users')
     .where({ id: ctx.from.id })
