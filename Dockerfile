@@ -1,8 +1,7 @@
 FROM node:latest
 WORKDIR /code
 COPY package*.json ./
-RUN npm install
-RUN npm i -g knex
-# RUN npm ci --only=production
+RUN npm --silent install
 COPY . .
-CMD /bin/bash
+RUN chmod +x start.sh
+CMD node index.js
