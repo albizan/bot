@@ -5,4 +5,4 @@ RUN npm install
 RUN npm i -g knex
 # RUN npm ci --only=production
 COPY . .
-CMD node index.js
+CMD /bin/bash
