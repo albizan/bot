@@ -89,7 +89,7 @@ bot.command('mute', ctx => {
     knex('users')
       .where({ id })
       .update({ muted: 'true' })
-      .then(rows => {
+      .then(() => {
         logger.info(`${id} is now muted`);
         ctx.reply(`${id} è stato mutato`);
       })
@@ -122,7 +122,7 @@ bot.command('unmute', ctx => {
     knex('users')
       .where({ id })
       .update({ muted: 'false' })
-      .then(rows => {
+      .then(() => {
         logger.info(`${id} è stato smutato`);
         ctx.reply(`${id} è stato smutato`);
       })
