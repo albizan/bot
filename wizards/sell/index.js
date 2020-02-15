@@ -1,13 +1,6 @@
 const WizardScene = require('telegraf/scenes/wizard');
 
 const {
-  getSellItemWizardPrompt,
-  getPaymentMethodsPrompt,
-  generateCaption,
-  generatePaymentsInlineKeyboard,
-} = require('../../helper');
-
-const {
   askForTitle,
   validateTitle,
   confirmTitleAndAskForDescription,
