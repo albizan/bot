@@ -4,7 +4,12 @@ exports.up = function(knex) {
       .string('id')
       .notNullable()
       .primary();
-    table.boolean('muted').notNullable();
+    table.string('username').notNullable();
+    table.string('name').notNullable();
+    table
+      .boolean('muted')
+      .defaultTo(false)
+      .notNullable();
   });
 };
 
