@@ -375,20 +375,19 @@ const updatePaymentMethods = async ctx => {
             return method !== 'Paypal';
           }
         );
+        ctx.answerCbQuery('Paypal rimosso');
         logger.info(`${ctx.from.username} removed Paypal as a payment method`);
       } else {
         ctx.wizard.state.paymentMethods =
           ctx.wizard.state.paymentMethods === undefined
             ? ['Paypal']
             : [...ctx.wizard.state.paymentMethods, 'Paypal'];
+        ctx.answerCbQuery('Paypal aggiunto');
         logger.info(`${ctx.from.username} added Paypal as a payment method`);
       }
       // Update message with dynamically generated inline keyboard of payment methods
       try {
-        await ctx.telegram.editMessageReplyMarkup(
-          ctx.callbackQuery.message.chat.id,
-          ctx.callbackQuery.message.message_id,
-          ctx.callbackQuery.inline_message_id,
+        await ctx.editMessageReplyMarkup(
           getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
@@ -407,19 +406,18 @@ const updatePaymentMethods = async ctx => {
             return method !== 'Hype';
           }
         );
+        ctx.answerCbQuery('Hype rimosso');
         logger.info(`${ctx.from.username} removed Hype as a payment method`);
       } else {
         ctx.wizard.state.paymentMethods =
           ctx.wizard.state.paymentMethods === undefined
             ? ['Hype']
             : [...ctx.wizard.state.paymentMethods, 'Hype'];
+        ctx.answerCbQuery('Hype aggiunto');
         logger.info(`${ctx.from.username} added Hype as a payment method`);
       }
       try {
-        await ctx.telegram.editMessageReplyMarkup(
-          ctx.callbackQuery.message.chat.id,
-          ctx.callbackQuery.message.message_id,
-          ctx.callbackQuery.inline_message_id,
+        await ctx.editMessageReplyMarkup(
           getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
@@ -438,19 +436,18 @@ const updatePaymentMethods = async ctx => {
             return method !== 'Contante';
           }
         );
+        ctx.answerCbQuery('Contante rimosso');
         logger.info(`${ctx.from.username} removed Cash as a payment method`);
       } else {
         ctx.wizard.state.paymentMethods =
           ctx.wizard.state.paymentMethods === undefined
             ? ['Contante']
             : [...ctx.wizard.state.paymentMethods, 'Contante'];
+        ctx.answerCbQuery('Contante aggiunto');
         logger.info(`${ctx.from.username} added Cash as a payment method`);
       }
       try {
-        await ctx.telegram.editMessageReplyMarkup(
-          ctx.callbackQuery.message.chat.id,
-          ctx.callbackQuery.message.message_id,
-          ctx.callbackQuery.inline_message_id,
+        await ctx.editMessageReplyMarkup(
           getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
@@ -469,6 +466,7 @@ const updatePaymentMethods = async ctx => {
             return method !== 'Bonifico';
           }
         );
+        ctx.answerCbQuery('Bonifico Rimosso');
         logger.info(
           `${ctx.from.username} removed Transfer as a payment method`
         );
@@ -477,13 +475,12 @@ const updatePaymentMethods = async ctx => {
           ctx.wizard.state.paymentMethods === undefined
             ? ['Bonifico']
             : [...ctx.wizard.state.paymentMethods, 'Bonifico'];
+
+        ctx.answerCbQuery('Bonifico aggiunto');
         logger.info(`${ctx.from.username} added Transfer as a payment method`);
       }
       try {
-        await ctx.telegram.editMessageReplyMarkup(
-          ctx.callbackQuery.message.chat.id,
-          ctx.callbackQuery.message.message_id,
-          ctx.callbackQuery.inline_message_id,
+        await ctx.editMessageReplyMarkup(
           getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
         );
         return;
