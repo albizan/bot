@@ -91,6 +91,7 @@ const confirmTitleAndAskForDescription = async ctx => {
     }
     return;
   }
+  ctx.answerCbQuery('Titolo Confermato');
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
@@ -164,6 +165,7 @@ const confirmDescriptionAndAskForImages = async ctx => {
     }
     return;
   }
+  ctx.answerCbQuery('Descrizione Confermata');
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
@@ -281,6 +283,7 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
     ctx.deleteMessage(message_id);
     return;
   }
+  ctx.answerCbQuery('Prezzo Confermato');
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
