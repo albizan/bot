@@ -40,6 +40,22 @@ const generateCaption = (
     \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
 };
 
+const generateSearchAnnouncement = (
+  first_name,
+  username,
+  id,
+  title,
+  description,
+  price,
+  paymentMethods
+) => {
+  return `<b>NUOVO ANNUNCIO DI RICERCA</b>\n\n${package} Prodotto: ${package}\n${title}
+    \n\n${memo} Descrizione ${memo}\n${description}
+    \n\n${moneyBag} Prezzo: ${moneyBag}\n${price}€
+    \n\n${moneyFly} Metodi di pagamento:${moneyFly}\n${paymentMethods.join(' ')}
+    \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
+};
+
 const sellItemMenuMarkup = Markup.inlineKeyboard([
   [
     Markup.callbackButton(`Modifica`, PREVIOUS_STEP),
@@ -98,6 +114,7 @@ const startMenuMarkup = Markup.inlineKeyboard([
 module.exports = {
   startMenuMarkup,
   generateCaption,
+  generateSearchAnnouncement,
   sellItemMenuMarkup,
   getPaymentMethodsMenuMarkup,
   generatePaymentsInlineKeyboard,

@@ -8,11 +8,13 @@ const {
 } = require('./types/callbacks.types');
 const {
   SELL_ITEM_WIZARD,
+  SEEK_ITEM_WIZARD,
   SUPPORT_CHAT_SCENE,
 } = require('./types/scenes.types');
 
 // Import Wizards
 const sellItemWizard = require('./wizards/sell');
+const seekItemWizard = require('./wizards/seek');
 
 // Imports Scenes
 const supportChat = require('./scenes/chat.scene');
@@ -29,7 +31,7 @@ const { startMenuMarkup } = require('./helper');
 const admins = process.env.ADMINS.split(',').map(admin => parseInt(admin));
 
 // Compose stage with given scenes
-const stage = new Stage([supportChat, sellItemWizard]);
+const stage = new Stage([supportChat, sellItemWizard, seekItemWizard]);
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -37,7 +39,6 @@ bot.use(session());
 bot.use(stage.middleware());
 
 bot.start(ctx => {
-  console.log(admins);
   const { first_name, id, username } = ctx.from;
   logger.info(`${username} started the Bot`);
 
@@ -59,15 +60,12 @@ bot.start(ctx => {
 
 // Handle middlewares for callback_data
 bot.action(SELL_ITEM, ctx => {
-  ctx.answerCbQuery('Completa il tuo annuncio');
+  ctx.answerCbQuery();
   ctx.scene.enter(SELL_ITEM_WIZARD);
 });
 bot.action(SEEK_ITEM, ctx => {
-  // Delete previous inline message to avoid cluttering the chat
-  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
-  ctx.reply('Questa funzionalità non è ancora disponibile', {
-    reply_markup: startMenuMarkup,
-  });
+  ctx.answerCbQuery();
+  ctx.scene.enter(SEEK_ITEM_WIZARD);
 });
 bot.action(SUPPORT_CHAT, ctx => {
   ctx.answerCbQuery('Ora puoi parlare con gli admin');
