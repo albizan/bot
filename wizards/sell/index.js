@@ -1,7 +1,8 @@
 const WizardScene = require('telegraf/scenes/wizard');
 
 const {
-  askForTitle,
+  askForCategory,
+  confirmCategoryAndAskForTitle,
   validateTitle,
   confirmTitleAndAskForDescription,
   validateDescription,
@@ -18,7 +19,9 @@ const { SELL_ITEM_WIZARD } = require('../../types/scenes.types');
 const sellItemWizard = new WizardScene(
   // Wizard's name
   SELL_ITEM_WIZARD,
-  askForTitle,
+  // Steps
+  askForCategory,
+  confirmCategoryAndAskForTitle,
   validateTitle,
   confirmTitleAndAskForDescription,
   validateDescription,
