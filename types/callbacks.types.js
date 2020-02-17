@@ -8,3 +8,14 @@ exports.PAYPAL = 'paypal';
 exports.HYPE = 'hype';
 exports.CASH = 'cash';
 exports.TRANSFER = 'transfer';
+
+exports.CPU = 'CPU';
+exports.GPU = 'GPU';
+exports.RAM = 'RAM';
+exports.MOBO = 'MOBO';
+exports.PSU = 'PSU';
+exports.STORAGE = 'STORAGE';
+exports.CASE = 'CASE';
+exports.PERIPHERALS = 'PERIPHERALS';
+exports.COMPLETE_PC = 'COMPLETE_PC';
+exports.OTHER = 'OTHER';
