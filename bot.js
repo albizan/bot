@@ -1,10 +1,22 @@
 const Telegraf = require('telegraf');
+const Markup = require('telegraf/markup');
 const knex = require('./db');
 // Import types
 const {
   SELL_ITEM,
   SEEK_ITEM,
+  SEARCH,
   SUPPORT_CHAT,
+  CPU,
+  GPU,
+  RAM,
+  MOBO,
+  PSU,
+  STORAGE,
+  CASE,
+  PERIPHERALS,
+  COMPLETE_PC,
+  OTHER,
 } = require('./types/callbacks.types');
 const {
   SELL_ITEM_WIZARD,
@@ -71,10 +83,70 @@ bot.action(SELL_ITEM, ctx => {
   ctx.answerCbQuery();
   ctx.scene.enter(SELL_ITEM_WIZARD);
 });
+
 bot.action(SEEK_ITEM, ctx => {
   ctx.answerCbQuery();
   ctx.scene.enter(SEEK_ITEM_WIZARD);
 });
+
+bot.action(SEARCH, ctx => {
+  ctx.answerCbQuery();
+  ctx.reply('Seleziona la Categoria', {
+    reply_markup: Markup.inlineKeyboard([
+      [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
+      [Markup.callbackButton(RAM, RAM), Markup.callbackButton(MOBO, MOBO)],
+      [
+        Markup.callbackButton(PSU, PSU),
+        Markup.callbackButton(STORAGE, STORAGE),
+      ],
+      [
+        Markup.callbackButton(CASE, CASE),
+        Markup.callbackButton(PERIPHERALS, PERIPHERALS),
+      ],
+      [Markup.callbackButton(COMPLETE_PC, COMPLETE_PC)],
+      [Markup.callbackButton(OTHER, OTHER)],
+    ])
+      .oneTime()
+      .resize(),
+  });
+});
+
+bot.action(CPU, ctx => {
+  knex('sale_announcements')
+    .where({ category: CPU })
+    .whereNotNull('url')
+    .then(rows => {
+      const items = rows.map(row => [Markup.urlButton(`${row.id}`, row.url)]);
+      if (items.length === 0) {
+        ctx.reply('Nessun annuncio trovato');
+      } else {
+        ctx.reply('CPU attualmente in vendita', {
+          reply_markup: Markup.inlineKeyboard(items),
+        });
+      }
+    })
+    .catch(err => console.log(err));
+});
+
+bot.action(RAM, ctx => {
+  knex('sale_announcements')
+    .where({ category: RAM })
+    .whereNotNull('url')
+    .then(rows => {
+      const items = rows.map(row => [
+        Markup.urlButton(`${row.title}`, row.url),
+      ]);
+      if (items.length === 0) {
+        ctx.reply('Nessun annuncio trovato');
+      } else {
+        ctx.reply('RAM attualmente in vendita', {
+          reply_markup: Markup.inlineKeyboard(items),
+        });
+      }
+    })
+    .catch(err => console.log(err));
+});
+
 bot.action(SUPPORT_CHAT, ctx => {
   ctx.answerCbQuery('Ora puoi parlare con gli admin');
   ctx.scene.enter(SUPPORT_CHAT_SCENE);
@@ -202,17 +274,36 @@ bot.command('unmute', ctx => {
       .catch(err => logger.error(err));
   }
 });
-bot.command('users', ctx => {
+
+bot.command('url', ctx => {
   const { id } = ctx.from;
   if (!admins.includes(id)) {
     return;
   }
-  knex('users').then(rows => {
-    rows.map(row => {
-      const { id } = row;
-      ctx.reply(id);
-    });
-  });
+
+  const { text, reply_to_message } = ctx.message;
+  if (!reply_to_message) {
+    return;
+  }
+
+  if (!reply_to_message.caption) {
+    return;
+  }
+
+  const announceUrl = text.split(' ')[1];
+  if (!announceUrl) {
+    return;
+  }
+
+  const announceId = reply_to_message.caption.split('ID annuncio: ')[1];
+
+  knex('sale_announcements')
+    .where({ id: announceId })
+    .update({ url: announceUrl })
+    .then(() => {
+      ctx.reply('URL salvata');
+    })
+    .catch(err => console.log(err));
 });
 
 bot.on('message', ctx => {
