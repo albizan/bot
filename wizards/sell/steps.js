@@ -6,6 +6,8 @@ const {
   generateCaption,
 } = require('../../helper');
 
+const knex = require('../../db');
+
 // Import sell item wizard type
 const { SELL_ITEM_WIZARD } = require('../../types/scenes.types');
 
@@ -18,32 +20,92 @@ const {
   HYPE,
   CASH,
   TRANSFER,
+  CPU,
+  GPU,
+  RAM,
+  MOBO,
+  PSU,
+  STORAGE,
+  CASE,
+  PERIPHERALS,
+  COMPLETE_PC,
+  OTHER,
 } = require('../../types/callbacks.types');
 
 // Import emojis
 const { package, memo, moneyBag } = require('../../emoji');
 
 /*
-  Step 1 of Wizard - Ask For Title
+  Ask For Category
   Initialize wizard's state for current wizard instance.
   The state will be automatically deleted when leaving the wizard with ctx.scene.leave()
-  Prompt user to write title
+  Prompt user to click on category button
 */
-const askForTitle = ctx => {
-  logger.info(`${ctx.from.username} entered ${SELL_ITEM_WIZARD}`);
+const askForCategory = ctx => {
+  logger.info(
+    `${ctx.from.username} entered step "ask for category" ${SELL_ITEM_WIZARD}`
+  );
   ctx.wizard.state = {};
-  ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", { parse_mode: 'HTML' });
+  ctx.reply('<b>Seleziona una categoria</b>', {
+    parse_mode: 'HTML',
+    reply_markup: Markup.inlineKeyboard([
+      [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
+      [Markup.callbackButton(RAM, RAM), Markup.callbackButton(MOBO, MOBO)],
+      [
+        Markup.callbackButton(PSU, PSU),
+        Markup.callbackButton(STORAGE, STORAGE),
+      ],
+      [
+        Markup.callbackButton(CASE, CASE),
+        Markup.callbackButton(PERIPHERALS, PERIPHERALS),
+      ],
+      [Markup.callbackButton(COMPLETE_PC, COMPLETE_PC)],
+      [Markup.callbackButton(OTHER, OTHER)],
+    ])
+      .oneTime()
+      .resize(),
+  });
   return ctx.wizard.next();
 };
 
 /*
-  Step 2 of Wizard - Validate Title
+  Wait for user's callback query and update state
+  Ask for title
+*/
+const confirmCategoryAndAskForTitle = ctx => {
+  logger.info(
+    `${ctx.from.username} entered step "confirm category and ask for title" of ${SELL_ITEM_WIZARD}`
+  );
+
+  if (!ctx.callbackQuery) {
+    if (ctx.message) {
+      const { message_id } = ctx.message;
+      // If user sends random message, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
+    }
+    return;
+  }
+
+  const { data } = ctx.callbackQuery;
+  ctx.wizard.state.category = data;
+  ctx.answerCbQuery(`Hai selezionato ${data}`);
+  ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", {
+    parse_mode: 'HTML',
+  });
+  return ctx.wizard.next();
+};
+
+/*
+  Validate Title
   Validate user's response (updates othen than text messages are deleted)
   Update wizard's state with given title
   Show Title and prompt user for confirmation
 */
 const validateTitle = async ctx => {
-  logger.info(`${ctx.from.username} entered step 2 of ${SELL_ITEM_WIZARD}`);
+  logger.info(
+    `${ctx.from.username} entered step "validate title" of ${SELL_ITEM_WIZARD}`
+  );
+  console.log(ctx.wizard.state);
   if (!ctx.message) {
     return;
   }
@@ -331,41 +393,58 @@ const updatePaymentMethods = async ctx => {
         description,
         images,
         value,
+        category,
         paymentMethods,
       } = ctx.wizard.state;
-      const { username, first_name, id } = ctx.from;
-      try {
-        // generate array of inputMediaPhoto to be sent with sendMediaGroup
-        const media = images.map(file_id => {
-          return {
-            type: 'photo',
-            media: file_id,
-          };
-        });
-        // Append caption to first image of media array, telegram client will display it as caption for the whole album
-        media[0].caption = generateCaption(
-          first_name,
-          username,
-          id,
-          title,
-          description,
-          value,
-          paymentMethods
-        );
-        ctx.telegram.sendMediaGroup(ctx.from.id, media);
-        await ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
-        logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
-        ctx.reply(
-          'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
-        );
-        return ctx.scene.leave();
-      } catch (error) {
-        logger.error(error);
-        ctx.reply(
-          'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
-        );
-        return ctx.scene.leave();
-      }
+      const { username, id } = ctx.from;
+
+      // generate array of inputMediaPhoto to be sent with sendMediaGroup
+      const media = images.map(file_id => {
+        return {
+          type: 'photo',
+          media: file_id,
+        };
+      });
+
+      // Insert announce in DB
+      knex('sale_announcements')
+        .returning('id')
+        .insert({
+          title: ctx.wizard.state.title,
+          user_id: id,
+          category: ctx.wizard.state.category,
+        })
+        .then(announceId => {
+          // Append caption to first image of media array, telegram client will display it as caption for the whole album
+          media[0].caption = generateCaption(
+            announceId,
+            category,
+            username,
+            id,
+            title,
+            description,
+            value,
+            paymentMethods
+          );
+          try {
+            // ctx.telegram.sendMediaGroup(id, media);
+            ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
+
+            logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
+            ctx.reply(
+              'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
+            );
+
+            return ctx.scene.leave();
+          } catch (error) {
+            logger.error(error);
+            ctx.reply(
+              'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
+            );
+            return ctx.scene.leave();
+          }
+        })
+        .catch(err => console.log(err));
     case PAYPAL:
       // If paypal is already present
       if (ctx.wizard.state.paymentMethods.includes('Paypal')) {
@@ -498,7 +577,8 @@ const updatePaymentMethods = async ctx => {
 };
 
 module.exports = {
-  askForTitle,
+  askForCategory,
+  confirmCategoryAndAskForTitle,
   validateTitle,
   confirmTitleAndAskForDescription,
   validateDescription,
