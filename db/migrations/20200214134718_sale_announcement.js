@@ -4,10 +4,18 @@ exports.up = function(knex) {
       .string('id')
       .notNullable()
       .primary();
+    table.string('user_id').notNullable();
+    table.string('category').notNullable();
+    table.string('url').nullable();
     table
-      .boolean('removed')
+      .boolean('isRemoved')
       .defaultTo(false)
       .notNullable();
+
+    table
+      .foreign('user_id')
+      .references('id')
+      .inTable('users');
   });
 };
 
