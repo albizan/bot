@@ -42,11 +42,19 @@ bot.start(ctx => {
   const { first_name, id, username } = ctx.from;
   logger.info(`${username} started the Bot`);
 
-  // Save new user to the database
+  // Save new user to the database if does not exist
   knex('users')
-    .insert({ id, username, name: first_name, muted: false })
-    .then(`${id} added to the database`)
-    .catch(err => logger.error(err.detail));
+    .where({ id })
+    .then(rows => {
+      if (rows.length === 0) {
+        knex('users')
+          .insert({ id, username, name: first_name, muted: false })
+          .then(logger.info(`${id} added to the database`))
+          .catch(err => logger.error(err.detail));
+      } else {
+        logger.info(`${rows[0].id} is already present in the database`);
+      }
+    });
 
   // When user starts bot, show welcome message in private chat and asks for type of action
   ctx.telegram.sendMessage(
@@ -78,10 +86,47 @@ bot.command('mute', ctx => {
   if (!admins.includes(id)) {
     return;
   }
+  // If admin specifies the id with command /mute 123456789
   if (!ctx.message.reply_to_message) {
+    const idToMute = ctx.message.text.split(' ')[1];
+    if (!idToMute) {
+      return;
+    }
+    knex('users')
+      .where({ id: idToMute })
+      .then(rows => {
+        if (rows.length === 0) {
+          ctx.reply('Non è stato trovato nessun utente');
+        } else {
+          knex('users')
+            .where({ id: idToMute })
+            .update({ muted: true })
+            .then(() => {
+              logger.info(`${id} is now muted`);
+              try {
+                ctx.reply(`L'utente con id ${idToMute} è stato mutato`);
+                ctx.telegram.sendMessage(
+                  idToMute,
+                  '<b>Da questo momento non potrai piu inviare messaggi agli admin</b>',
+                  {
+                    parse_mode: 'HTML',
+                    reply_markup: startMenuMarkup,
+                  }
+                );
+              } catch (error) {
+                ctx.reply('Impossibile inviare messaggio');
+              }
+            });
+        }
+      });
     return;
   }
   const { forward_from } = ctx.message.reply_to_message;
+  if (!forward_from) {
+    ctx.reply(
+      "Impossibile ottenere l'id dell'utente, mutare manualmente l'utente con il comando /mute id_utente"
+    );
+  }
   if (forward_from) {
     const { id } = forward_from;
     knex('users')
@@ -89,32 +134,62 @@ bot.command('mute', ctx => {
       .update({ muted: 'true' })
       .then(() => {
         logger.info(`${id} is now muted`);
-        ctx.reply(`${id} è stato mutato`);
+        try {
+          ctx.reply(`${id} è stato mutato`);
+          ctx.telegram.sendMessage(
+            id,
+            '<b>Da questo momento non potrai piu inviare messaggi agli admin</b>',
+            {
+              parse_mode: 'HTML',
+              reply_markup: startMenuMarkup,
+            }
+          );
+        } catch (error) {
+          ctx.reply('Impossibile inviare messaggio');
+        }
       })
       .catch(err => logger.error(err));
-    try {
-      ctx.telegram.sendMessage(
-        id,
-        '<b>Da questo momento non potrai piu inviare messaggi agli admin</b>',
-        {
-          parse_mode: 'HTML',
-          reply_markup: startMenuMarkup,
-        }
-      );
-    } catch (error) {
-      ctx.reply('Impossibile inviare messaggio');
-    }
   }
 });
+
 bot.command('unmute', ctx => {
   const { id } = ctx.from;
   if (!admins.includes(id)) {
     return;
   }
+
+  // If admin specifies the id with command /unmute 123456789
   if (!ctx.message.reply_to_message) {
+    const idToUnmute = ctx.message.text.split(' ')[1];
+    if (!idToUnmute) {
+      return;
+    }
+    knex('users')
+      .where({ id: idToUnmute })
+      .then(rows => {
+        if (rows.length === 0) {
+          ctx.reply('Non è stato trovato nessun utente');
+        } else {
+          knex('users')
+            .where({ id: idToUnmute })
+            .update({ muted: false })
+            .then(() => {
+              try {
+                ctx.reply(`L'utente con id ${idToUnmute} è stato smutato`);
+              } catch (error) {
+                ctx.reply('Impossibile inviare messaggio');
+              }
+            });
+        }
+      });
     return;
   }
   const { forward_from } = ctx.message.reply_to_message;
+  if (!forward_from) {
+    ctx.reply(
+      "Impossibile ottenere l'id dell'utente, smutare manualmente l'utente con il comando /unmute id_utente"
+    );
+  }
   if (forward_from) {
     const { id } = forward_from;
     knex('users')
