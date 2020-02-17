@@ -1,11 +1,6 @@
 const Markup = require('telegraf/markup');
 
 const {
-  SELL_ITEM,
-  SEEK_ITEM,
-  SUPPORT_CHAT,
-} = require('./types/callbacks.types');
-const {
   package,
   memo,
   moneyBag,
@@ -15,6 +10,10 @@ const {
 } = require('./emoji');
 // Import callback query types
 const {
+  SELL_ITEM,
+  SEEK_ITEM,
+  SUPPORT_CHAT,
+  SEARCH,
   NEXT_STEP,
   PREVIOUS_STEP,
   CLOSE_WIZARD,
@@ -25,7 +24,8 @@ const {
 } = require('./types/callbacks.types');
 
 const generateCaption = (
-  first_name,
+  announceId,
+  category,
   username,
   id,
   title,
@@ -33,11 +33,11 @@ const generateCaption = (
   value,
   paymentMethods
 ) => {
-  return `\n${package} Prodotto ${package}\n${title}
+  return `\n${package} Prodotto (${category}) ${package}\n${title}
     \n\n${memo} Descrizione ${memo}\n${description}
     \n\n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€
     \n\n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(' ')}
-    \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
+    \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID annuncio: ${announceId}`;
 };
 
 const generateSearchAnnouncement = (
@@ -102,11 +102,10 @@ const generatePaymentsInlineKeyboard = paymentMethods => {
 };
 
 const startMenuMarkup = Markup.inlineKeyboard([
-  [
-    Markup.callbackButton('Ricerca', SEEK_ITEM),
-    Markup.callbackButton('Vendita', SELL_ITEM),
-  ],
-  [Markup.callbackButton('Chatta con gli admin', SUPPORT_CHAT)],
+  [Markup.callbackButton('Nuovo Annuncio di Vendita', SELL_ITEM)],
+  [Markup.callbackButton('Nuovo Annuncio di Ricerca', SEEK_ITEM)],
+  [Markup.callbackButton('Cerca per Categoria', SEARCH)],
+  [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
 ])
   .oneTime()
   .resize();
