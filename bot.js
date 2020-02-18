@@ -167,7 +167,7 @@ bot.action(RAM, ctx => {
 });
 
 bot.action(SUPPORT_CHAT, ctx => {
-  ctx.answerCbQuery('Ora puoi parlare con gli admin');
+  ctx.answerCbQuery();
   ctx.scene.enter(SUPPORT_CHAT_SCENE);
 });
 
@@ -325,12 +325,79 @@ bot.command('url', ctx => {
     .catch(err => console.log(err));
 });
 
-bot.on('message', ctx => {
+bot.command('approve', async ctx => {
+  const { id } = ctx.from;
+  if (!admins.includes(id)) {
+    return;
+  }
+  try {
+    console.log(ctx.update);
+  } catch (error) {
+    ctx.reply(error.message);
+  }
+
+  const { reply_to_message } = ctx.message;
+  if (!reply_to_message) {
+    ctx.reply('Questo comando deve essere usato come risposta ad un annuncio');
+    return;
+  }
+
+  if (!reply_to_message.caption) {
+    return;
+  }
+
+  // generate again array of inputMediaPhoto to be sent with sendMediaGroup to channel
+  const media = reply_to_message.photo.map(photo => {
+    return {
+      type: 'photo',
+      media: photo.file_id,
+    };
+  });
+
+  // Append caption
+  media[0].caption = reply_to_message.caption;
+  try {
+    saleAnnounce = await ctx.telegram.sendMediaGroup(
+      process.env.CHANNEL_USERNAME,
+      media
+    );
+    // generate url
+    const url = `https://t.me/${process.env.CHANNEL_USERNAME.slice(1)}/${
+      saleAnnounce[0].message_id
+    }`;
+    ctx.reply(url);
+  } catch (error) {
+    console.log(error);
+    ctx.reply(
+      'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
+    );
+    ctx.reply(error.message);
+    return ctx.scene.leave();
+  }
+});
+
+bot.on('message', async ctx => {
+  const { id } = ctx.from;
+  if (!admins.includes(id)) {
+    return;
+  }
   const { text, reply_to_message } = ctx.message;
   if (!reply_to_message) {
     return;
   }
-  const { forward_from, caption } = reply_to_message;
+  const {
+    forward_from,
+    forward_date,
+    caption,
+    caption_entities,
+  } = reply_to_message;
+  // If admin replies to a message that was forwarded by a user
+  if (!forward_from && forward_date) {
+    console.log(reply_to_message);
+    ctx.reply(
+      "Impossibile ottenere l'id dell'utente, inviare il messaggio manualmente con il comando /reply id_utente text_message"
+    );
+  }
   if (forward_from) {
     const { id } = forward_from;
     try {
@@ -339,13 +406,27 @@ bot.on('message', ctx => {
     } catch (error) {
       ctx.reply('Impossibile inviare messaggio');
     }
-  } else if (caption) {
-    // Get user id from caption
-    const userId = caption.split('ID: ')[1];
+  } else if (caption && caption_entities) {
+    // Get user username from caption's entities and retreive user id from db
+    const entity = caption_entities.find(e => e.type === 'mention');
+    const username = caption.substring(
+      // offset + 1 in order to remove '@'
+      entity.offset + 1,
+      entity.offset + entity.length
+    );
     try {
-      ctx.telegram.sendMessage(userId, text);
+      const { id } = await knex('users')
+        .select('id')
+        .first()
+        .where({ username });
+      if (id) {
+        ctx.telegram.sendMessage(id, text);
+      } else {
+        ctx.reply('Utente non trovato, probabilmente ha cambiato username');
+        console.log('User not found');
+      }
     } catch (error) {
-      ctx.reply('Impossibile inviare messaggio');
+      console.log(error);
     }
   }
 });
