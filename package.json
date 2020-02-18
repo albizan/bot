@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "start:dev": "nodemon index.js",
-    "migrate:latest": "knex migrate:latest",
+    "migrations": "knex migrate:latest",
     "lint": "eslint ./**.js"
   },
   "author": "",
@@ -14,7 +14,6 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "knex": "^0.20.9",
-    "nanoid": "^2.1.11",
     "pg": "^7.18.1",
     "telegraf": "^3.36.0",
     "winston": "^3.2.1"
