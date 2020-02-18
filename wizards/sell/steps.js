@@ -89,9 +89,12 @@ const confirmCategoryAndAskForTitle = ctx => {
   const { data } = ctx.callbackQuery;
   ctx.wizard.state.category = data;
   ctx.answerCbQuery(`Hai selezionato ${data}`);
-  ctx.reply("<b>Inserisci il titolo dell'annuncio</b>", {
-    parse_mode: 'HTML',
-  });
+  ctx.reply(
+    '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci massimo 50 caratteri</i>',
+    {
+      parse_mode: 'HTML',
+    }
+  );
   return ctx.wizard.next();
 };
 
@@ -119,6 +122,12 @@ const validateTitle = async ctx => {
 
   // Check if text is a bot command, commands are not accepted and need to be deleted
   if (text.startsWith('/')) {
+    ctx.deleteMessage(message_id);
+    return;
+  }
+
+  if (text.length > 50) {
+    ctx.reply('AO, ti ho detto massimo 50, eddai su...');
     ctx.deleteMessage(message_id);
     return;
   }
@@ -160,7 +169,10 @@ const confirmTitleAndAskForDescription = async ctx => {
       logger.info(`${ctx.from.username} exited ${SELL_ITEM_WIZARD} in step 3`);
       return ctx.scene.leave();
     case NEXT_STEP:
-      await ctx.reply('Inserisci una descrizione');
+      await ctx.reply(
+        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci massimo 300 caratteri</i>',
+        { parse_mode: 'HTML' }
+      );
       return ctx.wizard.next();
     case PREVIOUS_STEP:
       await ctx.reply("Reinserisci il titolo dell'annuncio");
@@ -194,6 +206,12 @@ const validateDescription = async ctx => {
   const { text, message_id } = ctx.message;
   // Check if text is a bot command, commands are not accepted
   if (text.startsWith('/')) {
+    ctx.deleteMessage(message_id);
+    return;
+  }
+
+  if (text.length > 300) {
+    ctx.reply('AO, ti ho detto massimo 300, eddai su...');
     ctx.deleteMessage(message_id);
     return;
   }
@@ -407,44 +425,58 @@ const updatePaymentMethods = async ctx => {
       });
 
       // Insert announce in DB
-      knex('sale_announcements')
-        .returning('id')
-        .insert({
-          title: ctx.wizard.state.title,
-          user_id: id,
-          category: ctx.wizard.state.category,
-        })
-        .then(announceId => {
-          // Append caption to first image of media array, telegram client will display it as caption for the whole album
-          media[0].caption = generateCaption(
-            announceId,
-            category,
-            username,
-            id,
-            title,
-            description,
-            value,
-            paymentMethods
-          );
-          try {
-            // ctx.telegram.sendMediaGroup(id, media);
-            ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
+      let announceId, saleAnnounce, from_chat_id, message_id;
+      try {
+        announceId = await knex('sale_announcements')
+          .returning('id')
+          .insert({
+            product: ctx.wizard.state.title,
+            user_id: id,
+            category: ctx.wizard.state.category,
+          });
+        console.log(`Announce ${announceId} saved to database`);
+      } catch (err) {
+        logger.error('Cannot save sale announcement to the database');
+        console.log(err);
+      }
 
-            logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
-            ctx.reply(
-              'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
-            );
-
-            return ctx.scene.leave();
-          } catch (error) {
-            logger.error(error);
-            ctx.reply(
-              'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
-            );
-            return ctx.scene.leave();
-          }
-        })
-        .catch(err => console.log(err));
+      media[0].caption = generateCaption(
+        announceId,
+        category,
+        username,
+        title,
+        description,
+        value,
+        paymentMethods
+      );
+      try {
+        saleAnnounce = await ctx.telegram.sendMediaGroup(
+          process.env.SECRET_CHAT_ID,
+          media
+        );
+      } catch (error) {
+        ctx.reply(
+          'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
+        );
+        return ctx.scene.leave();
+      }
+      from_chat_id = saleAnnounce[0].chat.id;
+      message_id = saleAnnounce[0].message_id;
+      try {
+        await knex('sale_announcements')
+          .where({ id: parseInt(announceId) })
+          .update({ message_id, from_chat_id });
+      } catch (err) {
+        ctx.reply(
+          'Impossibile salvare annuncio nel database, ci scusiamo per il disagio'
+        );
+        console.log(err);
+      }
+      logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
+      ctx.reply(
+        'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
+      );
+      return ctx.scene.leave();
     case PAYPAL:
       // If paypal is already present
       if (ctx.wizard.state.paymentMethods.includes('Paypal')) {
