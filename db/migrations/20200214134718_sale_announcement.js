@@ -4,7 +4,9 @@ exports.up = function(knex) {
       .increments('id')
       .notNullable()
       .primary();
-    table.string('title').notNullable();
+    table.string('from_chat_id').nullable();
+    table.string('message_id').nullable();
+    table.string('product').notNullable();
     table.string('category').notNullable();
     table.string('url').nullable();
     table

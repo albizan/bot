@@ -5,7 +5,7 @@ exports.up = function(knex) {
       .notNullable()
       .primary();
     table.string('username').notNullable();
-    table.string('name').notNullable();
+    table.string('first_name').notNullable();
     table
       .boolean('muted')
       .defaultTo(false)
