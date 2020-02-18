@@ -27,17 +27,16 @@ const generateCaption = (
   announceId,
   category,
   username,
-  id,
   title,
   description,
   value,
   paymentMethods
 ) => {
-  return `\n${package} Prodotto (${category}) ${package}\n${title}
+  return `\n${package} Prodotto ${package}\n${title}
     \n\n${memo} Descrizione ${memo}\n${description}
     \n\n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€
-    \n\n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(' ')}
-    \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID annuncio: ${announceId}`;
+    \n\n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join('\n')}
+    \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\n\n#${category}\n#av${announceId}`;
 };
 
 const generateSearchAnnouncement = (
