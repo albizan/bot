@@ -1,4 +1,5 @@
 const Telegraf = require('telegraf');
+const { Stage, session } = Telegraf;
 const Markup = require('telegraf/markup');
 const knex = require('./db');
 // Import types
@@ -34,8 +35,6 @@ const supportChat = require('./scenes/chat.scene');
 // Import logger
 const logger = require('./logger');
 
-const { Stage, session } = Telegraf;
-
 // import markups
 const { startMenuMarkup } = require('./helper');
 
@@ -50,32 +49,52 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(session());
 bot.use(stage.middleware());
 
-bot.start(ctx => {
-  const { first_name, id, username } = ctx.from;
+bot.start(async ctx => {
+  const { id, username, first_name } = ctx.from;
+  try {
+    // When user starts bot, show welcome message in private chat and show menu
+    ctx.telegram.sendMessage(
+      id,
+      `Ciao <b>${first_name}</b>\n\nBenvenuto nel mercatino del gruppo <i>"PC Building Italia"</i>`,
+      {
+        reply_markup: startMenuMarkup,
+        parse_mode: 'HTML',
+      }
+    );
+  } catch (err) {
+    ctx.reply(
+      'Sono un BOT, non posso contattarti in privato se prima non vai su @nas_bot_test e clicchi su avvia'
+    );
+    console.log(err);
+  }
   logger.info(`${username} started the Bot`);
 
-  // Save new user to the database if does not exist
-  knex('users')
-    .where({ id })
-    .then(rows => {
-      if (rows.length === 0) {
-        knex('users')
-          .insert({ id, username, name: first_name, muted: false })
-          .then(logger.info(`${id} added to the database`))
-          .catch(err => logger.error(err.detail));
-      } else {
-        logger.info(`${rows[0].id} is already present in the database`);
-      }
-    });
-
-  // When user starts bot, show welcome message in private chat and asks for type of action
-  ctx.telegram.sendMessage(
-    id,
-    `Ciao ${first_name}\n\nBenvenuto nel mercatino del gruppo "PC Building Italia"`,
-    {
-      reply_markup: startMenuMarkup,
+  // Retrieve user id from id
+  let users = [];
+  try {
+    users = await knex('users').where({ id });
+  } catch (err) {
+    logger.error('Cannot retrieve users from database');
+    console.log(err);
+  }
+  // If user is not in the database, save it
+  if (users.length === 0) {
+    try {
+      const insertedUserId = await knex('users')
+        .returning('id')
+        .insert({
+          id,
+          username,
+          first_name,
+        });
+      logger.info(`${insertedUserId} saved to the database`);
+    } catch (err) {
+      logger.error('Cannot insert in db');
+      console.log(err);
     }
-  );
+  } else {
+    logger.info(`${users[0].id} is already present in the database`);
+  }
 });
 
 // Handle middlewares for callback_data
