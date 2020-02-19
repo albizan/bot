@@ -425,8 +425,8 @@ const updatePaymentMethods = async ctx => {
             product: ctx.wizard.state.title,
             user_id: id,
             category: ctx.wizard.state.category,
+            images: images.join(','),
           });
-        console.log(`Announce ${announceId} saved to database`);
       } catch (err) {
         logger.error('Cannot save sale announcement to the database');
         console.log(err);
