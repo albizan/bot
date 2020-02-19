@@ -2,6 +2,7 @@ const Markup = require('telegraf/markup');
 const logger = require('../../logger');
 const {
   sellItemMenuMarkup,
+  categoryMenuMarkup,
   getPaymentMethodsMenuMarkup,
   generateCaption,
 } = require('../../helper');
@@ -13,6 +14,7 @@ const { SELL_ITEM_WIZARD } = require('../../types/scenes.types');
 
 // Import callback query types
 const {
+  HOME,
   NEXT_STEP,
   PREVIOUS_STEP,
   CLOSE_WIZARD,
@@ -20,16 +22,6 @@ const {
   HYPE,
   CASH,
   TRANSFER,
-  CPU,
-  GPU,
-  RAM,
-  MOBO,
-  PSU,
-  STORAGE,
-  CASE,
-  PERIPHERALS,
-  COMPLETE_PC,
-  OTHER,
 } = require('../../types/callbacks.types');
 
 // Import emojis
@@ -48,22 +40,7 @@ const askForCategory = ctx => {
   ctx.wizard.state = {};
   ctx.reply('<b>Seleziona una categoria</b>', {
     parse_mode: 'HTML',
-    reply_markup: Markup.inlineKeyboard([
-      [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
-      [Markup.callbackButton(RAM, RAM), Markup.callbackButton(MOBO, MOBO)],
-      [
-        Markup.callbackButton(PSU, PSU),
-        Markup.callbackButton(STORAGE, STORAGE),
-      ],
-      [
-        Markup.callbackButton(CASE, CASE),
-        Markup.callbackButton(PERIPHERALS, PERIPHERALS),
-      ],
-      [Markup.callbackButton(COMPLETE_PC, COMPLETE_PC)],
-      [Markup.callbackButton(OTHER, OTHER)],
-    ])
-      .oneTime()
-      .resize(),
+    reply_markup: categoryMenuMarkup,
   });
   return ctx.wizard.next();
 };
@@ -85,9 +62,12 @@ const confirmCategoryAndAskForTitle = ctx => {
     }
     return;
   }
-
+  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
   ctx.wizard.state.category = data;
+  if (data === HOME) {
+    return ctx.scene.leave();
+  }
   ctx.answerCbQuery(`Hai selezionato ${data}`);
   ctx.reply(
     '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci massimo 50 caratteri</i>',
@@ -108,7 +88,6 @@ const validateTitle = async ctx => {
   logger.info(
     `${ctx.from.username} entered step "validate title" of ${SELL_ITEM_WIZARD}`
   );
-  console.log(ctx.wizard.state);
   if (!ctx.message) {
     return;
   }
@@ -127,7 +106,7 @@ const validateTitle = async ctx => {
   }
 
   if (text.length > 50) {
-    ctx.reply('AO, ti ho detto massimo 50, eddai su...');
+    ctx.reply('Il testo inserito è troppo lungo');
     ctx.deleteMessage(message_id);
     return;
   }
@@ -136,19 +115,16 @@ const validateTitle = async ctx => {
   ctx.wizard.state.title = text;
 
   // Ask for confirmation
-  await ctx.reply(`${package} Titolo: ${text}`, {
+  await ctx.reply(`<b>Prodotto</b>: ${text}`, {
     reply_markup: sellItemMenuMarkup,
+    parse_mode: 'HTML',
   });
   return ctx.wizard.next();
 };
 
 /*
-  Step 3 of Wizard - Ask For Description
+  Ask For Description
   Validate user's response (only callback_queries are accepted)
-  Based on callback_query make decisions:
-    If user confirms, ask for description, wait for user's input and then go to next step
-    If user wants to edit title, re-show title prompt and repeat this step
-    If user wants to leave, exit current scene
 */
 const confirmTitleAndAskForDescription = async ctx => {
   logger.info(`${ctx.from.username} entered step 3 of ${SELL_ITEM_WIZARD}`);
@@ -162,7 +138,8 @@ const confirmTitleAndAskForDescription = async ctx => {
     }
     return;
   }
-  ctx.answerCbQuery('Titolo Confermato');
+  ctx.answerCbQuery();
+  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
@@ -170,12 +147,17 @@ const confirmTitleAndAskForDescription = async ctx => {
       return ctx.scene.leave();
     case NEXT_STEP:
       await ctx.reply(
-        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci massimo 300 caratteri</i>',
+        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci massimo 500 caratteri</i>',
         { parse_mode: 'HTML' }
       );
       return ctx.wizard.next();
     case PREVIOUS_STEP:
-      await ctx.reply("Reinserisci il titolo dell'annuncio");
+      await ctx.reply(
+        '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci massimo 50 caratteri</i>',
+        {
+          parse_mode: 'HTML',
+        }
+      );
       return ctx.wizard.back();
     default:
       await ctx.reply('Bzzagrakkchhabz, Bot is dead, You killed the bot');
@@ -211,7 +193,7 @@ const validateDescription = async ctx => {
   }
 
   if (text.length > 300) {
-    ctx.reply('AO, ti ho detto massimo 300, eddai su...');
+    ctx.reply('Il testo inserito è troppo lungo');
     ctx.deleteMessage(message_id);
     return;
   }
@@ -220,8 +202,9 @@ const validateDescription = async ctx => {
   ctx.wizard.state.description = text;
 
   // Ask for confirmation
-  await ctx.reply(`${memo} Descrizione: ${text}`, {
+  await ctx.reply(`<b>Descrizione:</b> ${text}`, {
     reply_markup: sellItemMenuMarkup,
+    parse_mode: 'HTML',
   });
   return ctx.wizard.next();
 };
@@ -245,11 +228,10 @@ const confirmDescriptionAndAskForImages = async ctx => {
     }
     return;
   }
-  ctx.answerCbQuery('Descrizione Confermata');
+  ctx.answerCbQuery();
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
-      logger.info(`${ctx.from.username} exited ${SELL_ITEM_WIZARD} in step 5`);
       return ctx.scene.leave();
     case NEXT_STEP:
       await ctx.reply(
@@ -261,7 +243,10 @@ const confirmDescriptionAndAskForImages = async ctx => {
       );
       return ctx.wizard.next();
     case PREVIOUS_STEP:
-      await ctx.reply("Reinserisci la descrizione dell'annuncio");
+      ctx.reply(
+        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci massimo 500 caratteri</i>',
+        { parse_mode: 'HTML' }
+      );
       return ctx.wizard.back();
     default:
       await ctx.reply('Bzzagrakkchhabz, Bot is dead, You killed the bot');
@@ -330,7 +315,10 @@ const priceValidation = async ctx => {
   if (!ctx.message) {
     return;
   }
-  if (!ctx.message.text || isNaN(ctx.message.text.replace(',', '.'))) {
+  if (
+    !ctx.message.text ||
+    isNaN(parseFloat(ctx.message.text.replace(',', '.')))
+  ) {
     const { message_id } = ctx.message;
     // If user sends random message, delete it in order to avoid chat cluttering
     ctx.deleteMessage(message_id);
@@ -340,8 +328,9 @@ const priceValidation = async ctx => {
   const { text } = ctx.message;
   // Convert string into a floating point number
   ctx.wizard.state.value = parseFloat(text.replace(',', '.'));
-  await ctx.reply(`${moneyBag} Prezzo: ${ctx.wizard.state.value}€`, {
+  await ctx.reply(`<b>Prezzo:</b> ${ctx.wizard.state.value}€`, {
     reply_markup: sellItemMenuMarkup,
+    parse_mode: 'HTML',
   });
   return ctx.wizard.next();
 };
@@ -363,7 +352,8 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
     ctx.deleteMessage(message_id);
     return;
   }
-  ctx.answerCbQuery('Prezzo Confermato');
+  ctx.answerCbQuery();
+  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
@@ -380,7 +370,9 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
       });
       return ctx.wizard.next();
     case PREVIOUS_STEP:
-      await ctx.reply('Reinserisci Il prezzo');
+      await ctx.reply(
+        'Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)'
+      );
       return ctx.wizard.back();
     default:
       await ctx.reply('Bzzagrakkchhabz', 'Bot is dead', 'You killed the bot');
@@ -425,7 +417,7 @@ const updatePaymentMethods = async ctx => {
       });
 
       // Insert announce in DB
-      let announceId, saleAnnounce, from_chat_id, message_id;
+      let announceId, saleAnnounce;
       try {
         announceId = await knex('sale_announcements')
           .returning('id')
@@ -459,18 +451,6 @@ const updatePaymentMethods = async ctx => {
           'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
         );
         return ctx.scene.leave();
-      }
-      from_chat_id = saleAnnounce[0].chat.id;
-      message_id = saleAnnounce[0].message_id;
-      try {
-        await knex('sale_announcements')
-          .where({ id: parseInt(announceId) })
-          .update({ message_id, from_chat_id });
-      } catch (err) {
-        ctx.reply(
-          'Impossibile salvare annuncio nel database, ci scusiamo per il disagio'
-        );
-        console.log(err);
       }
       logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
       ctx.reply(
