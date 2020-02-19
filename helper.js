@@ -14,6 +14,7 @@ const {
   SEEK_ITEM,
   SUPPORT_CHAT,
   SEARCH,
+  HOME,
   NEXT_STEP,
   PREVIOUS_STEP,
   CLOSE_WIZARD,
@@ -21,6 +22,16 @@ const {
   HYPE,
   CASH,
   TRANSFER,
+  CPU,
+  GPU,
+  RAM,
+  MOBO,
+  PSU,
+  STORAGE,
+  CASE,
+  PERIPHERALS,
+  COMPLETE_PC,
+  OTHER,
 } = require('./types/callbacks.types');
 
 const generateCaption = (
@@ -61,9 +72,7 @@ const sellItemMenuMarkup = Markup.inlineKeyboard([
     Markup.callbackButton('Esci', CLOSE_WIZARD),
     Markup.callbackButton(`Avanti`, NEXT_STEP),
   ],
-])
-  .oneTime()
-  .resize();
+]).resize();
 
 // Return the reply_markup with an inline keyboard used to choose payment methods
 const getPaymentMethodsMenuMarkup = paymentMethods => {
@@ -100,17 +109,28 @@ const generatePaymentsInlineKeyboard = paymentMethods => {
   ];
 };
 
+const categoryMenuMarkup = Markup.inlineKeyboard([
+  [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
+  [Markup.callbackButton(PSU, PSU), Markup.callbackButton(MOBO, MOBO)],
+  [Markup.callbackButton(RAM, RAM), Markup.callbackButton(STORAGE, STORAGE)],
+  [
+    Markup.callbackButton(COMPLETE_PC, COMPLETE_PC),
+    Markup.callbackButton(PERIPHERALS, PERIPHERALS),
+  ],
+  [Markup.callbackButton(CASE, CASE), Markup.callbackButton(OTHER, OTHER)],
+  [Markup.callbackButton(HOME, HOME)],
+]).resize();
+
 const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Nuovo Annuncio di Vendita', SELL_ITEM)],
   [Markup.callbackButton('Nuovo Annuncio di Ricerca', SEEK_ITEM)],
   [Markup.callbackButton('Cerca per Categoria', SEARCH)],
   [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
-])
-  .oneTime()
-  .resize();
+]).resize();
 
 module.exports = {
   startMenuMarkup,
+  categoryMenuMarkup,
   generateCaption,
   generateSearchAnnouncement,
   sellItemMenuMarkup,
