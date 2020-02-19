@@ -7,6 +7,7 @@ exports.up = function(knex) {
     table.string('product').notNullable();
     table.string('category').notNullable();
     table.string('url').nullable();
+    table.text('images').notNullable();
     table
       .boolean('isRemoved')
       .defaultTo(false)
