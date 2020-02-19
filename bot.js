@@ -131,21 +131,22 @@ bot.action(SEARCH, ctx => {
   });
 });
 
-bot.action(CPU, ctx => {
-  knex('sale_announcements')
-    .where({ category: CPU })
+bot.action(CPU, async ctx => {
+  const result = await knex('sale_announcements')
+    .select('product', 'url')
     .whereNotNull('url')
-    .then(rows => {
-      const items = rows.map(row => [Markup.urlButton(`${row.id}`, row.url)]);
-      if (items.length === 0) {
-        ctx.reply('Nessun annuncio trovato');
-      } else {
-        ctx.reply('CPU attualmente in vendita', {
-          reply_markup: Markup.inlineKeyboard(items),
-        });
-      }
-    })
-    .catch(err => console.log(err));
+    .where({ category: CPU });
+
+  const buttons = result.map(row => [
+    Markup.urlButton(`${row.product}`, row.url),
+  ]);
+  if (buttons.length === 0) {
+    ctx.reply('Nessun annuncio trovato');
+  } else {
+    ctx.reply('CPU attualmente in vendita', {
+      reply_markup: Markup.inlineKeyboard(buttons),
+    });
+  }
 });
 
 bot.action(RAM, ctx => {
@@ -295,46 +296,10 @@ bot.command('unmute', ctx => {
   }
 });
 
-bot.command('url', ctx => {
-  const { id } = ctx.from;
-  if (!admins.includes(id)) {
-    return;
-  }
-
-  const { text, reply_to_message } = ctx.message;
-  if (!reply_to_message) {
-    return;
-  }
-
-  if (!reply_to_message.caption) {
-    return;
-  }
-
-  const announceUrl = text.split(' ')[1];
-  if (!announceUrl) {
-    return;
-  }
-
-  const announceId = reply_to_message.caption.split('ID annuncio: ')[1];
-
-  knex('sale_announcements')
-    .where({ id: announceId })
-    .update({ url: announceUrl })
-    .then(() => {
-      ctx.reply('URL salvata');
-    })
-    .catch(err => console.log(err));
-});
-
 bot.command('approve', async ctx => {
   const { id } = ctx.from;
   if (!admins.includes(id)) {
     return;
-  }
-  try {
-    console.log(ctx.update);
-  } catch (error) {
-    ctx.reply(error.message);
   }
 
   const { reply_to_message } = ctx.message;
@@ -346,16 +311,32 @@ bot.command('approve', async ctx => {
   if (!reply_to_message.caption) {
     return;
   }
+  // Get announce id from caption's entities
+  const entity = reply_to_message.caption_entities[2];
+  const announceId = reply_to_message.caption.substring(
+    // offset + 2 in order to remove '#av'
+    entity.offset + 3,
+    entity.offset + entity.length
+  );
 
+  // Retieve images of the sale announce from the database
+  let images;
+  try {
+    const result = await knex('sale_announcements')
+      .select('images')
+      .first()
+      .where({ id: announceId });
+    image_ids = result.images.split(',');
+  } catch (error) {
+    console.log('Cannot retreive images for current announce');
+  }
   // generate again array of inputMediaPhoto to be sent with sendMediaGroup to channel
-  const media = reply_to_message.photo.map(photo => {
+  const media = image_ids.map(file_id => {
     return {
       type: 'photo',
-      media: photo.file_id,
+      media: file_id,
     };
   });
-
-  // Append caption
   media[0].caption = reply_to_message.caption;
   try {
     saleAnnounce = await ctx.telegram.sendMediaGroup(
@@ -366,6 +347,13 @@ bot.command('approve', async ctx => {
     const url = `https://t.me/${process.env.CHANNEL_USERNAME.slice(1)}/${
       saleAnnounce[0].message_id
     }`;
+
+    const result = await knex('sale_announcements')
+      .where({ id: announceId })
+      .update({ url });
+    console.log(url);
+
+    // Update dabase with newly created url
     ctx.reply(url);
   } catch (error) {
     console.log(error);
