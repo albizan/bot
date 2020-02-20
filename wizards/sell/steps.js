@@ -34,9 +34,6 @@ const { package, memo, moneyBag } = require('../../emoji');
   Prompt user to click on category button
 */
 const askForCategory = ctx => {
-  logger.info(
-    `${ctx.from.username} entered step "ask for category" ${SELL_ITEM_WIZARD}`
-  );
   ctx.wizard.state = {};
   ctx.reply('<b>Seleziona una categoria</b>', {
     parse_mode: 'HTML',
@@ -50,10 +47,6 @@ const askForCategory = ctx => {
   Ask for title
 */
 const confirmCategoryAndAskForTitle = ctx => {
-  logger.info(
-    `${ctx.from.username} entered step "confirm category and ask for title" of ${SELL_ITEM_WIZARD}`
-  );
-
   if (!ctx.callbackQuery) {
     if (ctx.message) {
       const { message_id } = ctx.message;
@@ -85,9 +78,6 @@ const confirmCategoryAndAskForTitle = ctx => {
   Show Title and prompt user for confirmation
 */
 const validateTitle = async ctx => {
-  logger.info(
-    `${ctx.from.username} entered step "validate title" of ${SELL_ITEM_WIZARD}`
-  );
   if (!ctx.message) {
     return;
   }
@@ -127,8 +117,6 @@ const validateTitle = async ctx => {
   Validate user's response (only callback_queries are accepted)
 */
 const confirmTitleAndAskForDescription = async ctx => {
-  logger.info(`${ctx.from.username} entered step 3 of ${SELL_ITEM_WIZARD}`);
-
   // If not callbackQuery, delete message if possible
   if (!ctx.callbackQuery) {
     if (ctx.message) {
@@ -143,7 +131,6 @@ const confirmTitleAndAskForDescription = async ctx => {
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
-      logger.info(`${ctx.from.username} exited ${SELL_ITEM_WIZARD} in step 3`);
       return ctx.scene.leave();
     case NEXT_STEP:
       await ctx.reply(
@@ -172,8 +159,6 @@ const confirmTitleAndAskForDescription = async ctx => {
   Show description and prompt user for confirmation
 */
 const validateDescription = async ctx => {
-  logger.info(`${ctx.from.username} entered step 4 of ${SELL_ITEM_WIZARD}`);
-
   // Check if user sent a message and not a callback_query, if it is a message check if it is a text and not a GIF/Sticker
   if (!ctx.message) {
     return;
@@ -218,8 +203,6 @@ const validateDescription = async ctx => {
     If user wants to leave, exit current scene
 */
 const confirmDescriptionAndAskForImages = async ctx => {
-  logger.info(`${ctx.from.username} entered step 5 of ${SELL_ITEM_WIZARD}`);
-
   if (!ctx.callbackQuery) {
     if (ctx.message) {
       const { message_id } = ctx.message;
@@ -259,8 +242,6 @@ const confirmDescriptionAndAskForImages = async ctx => {
   Add image ids to wizard state and proceed when user sends 'Avanti' message or click on Avanti button
 */
 const validateImagesAndAskForPrice = async ctx => {
-  logger.info(`${ctx.from.username} entered step 6 of ${SELL_ITEM_WIZARD}`);
-
   // User did not send an image
   if (!ctx.message) {
     return;
@@ -302,7 +283,6 @@ const validateImagesAndAskForPrice = async ctx => {
     ctx.wizard.state.images === undefined
       ? [file_id]
       : [...ctx.wizard.state.images, file_id];
-  logger.info(`${ctx.from.username} uploaded an image`);
   return;
 };
 
@@ -310,8 +290,6 @@ const validateImagesAndAskForPrice = async ctx => {
   Step 7 of Wizard - Price Validation
 */
 const priceValidation = async ctx => {
-  logger.info(`${ctx.from.username} entered step 7 of ${SELL_ITEM_WIZARD}`);
-
   if (!ctx.message) {
     return;
   }
@@ -344,8 +322,6 @@ const priceValidation = async ctx => {
     If user wants to leave, exit current scene
 */
 const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
-  logger.info(`${ctx.from.username} entered step 8 of ${SELL_ITEM_WIZARD}`);
-
   if (!ctx.callbackQuery) {
     const { message_id } = ctx.message;
     // If user sends random message, delete it in order to avoid chat cluttering
@@ -357,10 +333,8 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
-      logger.info(`${ctx.from.username} exited ${SELL_ITEM_WIZARD} in step 8`);
       return ctx.scene.leave();
     case NEXT_STEP:
-      logger.info(`${ctx.from.username} confirmed value`);
       ctx.wizard.state.paymentMethods = [];
       const paymentMethodsPrompt = getPaymentMethodsMenuMarkup(
         ctx.wizard.state.paymentMethods
@@ -452,7 +426,6 @@ const updatePaymentMethods = async ctx => {
         );
         return ctx.scene.leave();
       }
-      logger.info(`${ctx.from.username} completed ${SELL_ITEM_WIZARD}`);
       ctx.reply(
         'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
       );
@@ -467,14 +440,12 @@ const updatePaymentMethods = async ctx => {
           }
         );
         ctx.answerCbQuery('Paypal rimosso');
-        logger.info(`${ctx.from.username} removed Paypal as a payment method`);
       } else {
         ctx.wizard.state.paymentMethods =
           ctx.wizard.state.paymentMethods === undefined
             ? ['Paypal']
             : [...ctx.wizard.state.paymentMethods, 'Paypal'];
         ctx.answerCbQuery('Paypal aggiunto');
-        logger.info(`${ctx.from.username} added Paypal as a payment method`);
       }
       // Update message with dynamically generated inline keyboard of payment methods
       try {
@@ -498,14 +469,12 @@ const updatePaymentMethods = async ctx => {
           }
         );
         ctx.answerCbQuery('Hype rimosso');
-        logger.info(`${ctx.from.username} removed Hype as a payment method`);
       } else {
         ctx.wizard.state.paymentMethods =
           ctx.wizard.state.paymentMethods === undefined
             ? ['Hype']
             : [...ctx.wizard.state.paymentMethods, 'Hype'];
         ctx.answerCbQuery('Hype aggiunto');
-        logger.info(`${ctx.from.username} added Hype as a payment method`);
       }
       try {
         await ctx.editMessageReplyMarkup(
@@ -528,14 +497,12 @@ const updatePaymentMethods = async ctx => {
           }
         );
         ctx.answerCbQuery('Contante rimosso');
-        logger.info(`${ctx.from.username} removed Cash as a payment method`);
       } else {
         ctx.wizard.state.paymentMethods =
           ctx.wizard.state.paymentMethods === undefined
             ? ['Contante']
             : [...ctx.wizard.state.paymentMethods, 'Contante'];
         ctx.answerCbQuery('Contante aggiunto');
-        logger.info(`${ctx.from.username} added Cash as a payment method`);
       }
       try {
         await ctx.editMessageReplyMarkup(
@@ -558,9 +525,6 @@ const updatePaymentMethods = async ctx => {
           }
         );
         ctx.answerCbQuery('Bonifico Rimosso');
-        logger.info(
-          `${ctx.from.username} removed Transfer as a payment method`
-        );
       } else {
         ctx.wizard.state.paymentMethods =
           ctx.wizard.state.paymentMethods === undefined
@@ -568,7 +532,6 @@ const updatePaymentMethods = async ctx => {
             : [...ctx.wizard.state.paymentMethods, 'Bonifico'];
 
         ctx.answerCbQuery('Bonifico aggiunto');
-        logger.info(`${ctx.from.username} added Transfer as a payment method`);
       }
       try {
         await ctx.editMessageReplyMarkup(
