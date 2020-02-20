@@ -1,4 +1,5 @@
 const WizardScene = require('telegraf/scenes/wizard');
+const { startMenuMarkup } = require('../../helper');
 
 const {
   askForCategory,
@@ -13,12 +14,12 @@ const {
   updatePaymentMethods,
 } = require('./steps');
 
-const { SELL_ITEM_WIZARD } = require('../../types/scenes.types');
+const { SELL_PRODUCT_WIZARD } = require('../../types/scenes.types');
 
 // A wizard is a special type of scene
-const sellItemWizard = new WizardScene(
+const sellProductWizard = new WizardScene(
   // Wizard's name
-  SELL_ITEM_WIZARD,
+  SELL_PRODUCT_WIZARD,
   // Steps
   askForCategory,
   confirmCategoryAndAskForTitle,
@@ -32,9 +33,7 @@ const sellItemWizard = new WizardScene(
   updatePaymentMethods
 );
 
-sellItemWizard.leave(ctx =>
-  ctx.reply(
-    'Alla prossima, ricorda di scrivere /start se vuoi iniziare da capo la procedura'
-  )
+sellProductWizard.leave(ctx =>
+  ctx.reply('Benvenuto nel mercatino', { reply_markup: startMenuMarkup })
 );
-module.exports = sellItemWizard;
+module.exports = sellProductWizard;
