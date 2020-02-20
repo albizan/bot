@@ -320,7 +320,7 @@ bot.command('approve', async ctx => {
   );
 
   // Retieve images of the sale announce from the database
-  let images;
+  let image_ids, saleAnnounce;
   try {
     const result = await knex('sale_announcements')
       .select('images')
@@ -348,10 +348,9 @@ bot.command('approve', async ctx => {
       saleAnnounce[0].message_id
     }`;
 
-    const result = await knex('sale_announcements')
+    await knex('sale_announcements')
       .where({ id: announceId })
       .update({ url });
-    console.log(url);
 
     // Update dabase with newly created url
     ctx.reply(url);
