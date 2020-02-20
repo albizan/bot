@@ -3,6 +3,7 @@ const {
   setupMuteCommand,
   setupUnmuteCommand,
 } = require('./administration');
+const setupStartCommand = require('./start');
 
 function setupAdministrationCommands(bot) {
   setupApproveCommand(bot);
@@ -10,6 +11,13 @@ function setupAdministrationCommands(bot) {
   setupUnmuteCommand(bot);
 }
 
-module.exports = {
-  setupAdministrationCommands,
-};
+function setupBaseCommands(bot) {
+  setupStartCommand(bot);
+}
+
+function setupCommands(bot) {
+  setupAdministrationCommands(bot);
+  setupBaseCommands(bot);
+}
+
+module.exports = setupCommands;
