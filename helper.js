@@ -1,5 +1,8 @@
 const Markup = require('telegraf/markup');
 
+// Import Database
+const knex = require('./db');
+
 const {
   package,
   memo,
@@ -128,6 +131,16 @@ const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
 ]).resize();
 
+const upsert = params => {
+  const { table, object, constraint } = params;
+  const insert = knex(table).insert(object);
+  const update = knex.queryBuilder().update(object);
+  return knex
+    .raw(`? ON CONFLICT ${constraint} DO ? returning *`, [insert, update])
+    .get('rows')
+    .get(0);
+};
+
 module.exports = {
   startMenuMarkup,
   categoryMenuMarkup,
@@ -136,4 +149,5 @@ module.exports = {
   sellItemMenuMarkup,
   getPaymentMethodsMenuMarkup,
   generatePaymentsInlineKeyboard,
+  upsert,
 };
