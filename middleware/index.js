@@ -6,7 +6,7 @@ const { Stage, session } = Telegraf;
 const { setupSaleProduct } = require('./actions');
 
 // Import Wizard Scenes
-const sellProductWizard = require('../wizards/sell');
+const sellProductWizard = require('../wizards/sellProduct');
 const seekItemWizard = require('../wizards/seek');
 
 // Imports Base Scenes
