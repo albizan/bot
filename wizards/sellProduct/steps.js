@@ -63,7 +63,7 @@ const confirmCategoryAndAskForTitle = ctx => {
   }
   ctx.answerCbQuery(`Hai selezionato ${data}`);
   ctx.reply(
-    '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci massimo 50 caratteri</i>',
+    '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci minimo 10 e massimo 50 caratteri</i>',
     {
       parse_mode: 'HTML',
     }
@@ -101,6 +101,12 @@ const validateTitle = async ctx => {
     return;
   }
 
+  if (text.length < 10) {
+    ctx.reply('Il testo inserito è troppo corto');
+    ctx.deleteMessage(message_id);
+    return;
+  }
+
   // Update wizard state with given validated title
   ctx.wizard.state.title = text;
 
@@ -134,7 +140,7 @@ const confirmTitleAndAskForDescription = async ctx => {
       return ctx.scene.leave();
     case NEXT_STEP:
       await ctx.reply(
-        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci massimo 500 caratteri</i>',
+        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci minimo 20 e  massimo 500 caratteri</i>',
         { parse_mode: 'HTML' }
       );
       return ctx.wizard.next();
@@ -177,8 +183,14 @@ const validateDescription = async ctx => {
     return;
   }
 
-  if (text.length > 300) {
+  if (text.length > 500) {
     ctx.reply('Il testo inserito è troppo lungo');
+    ctx.deleteMessage(message_id);
+    return;
+  }
+
+  if (text.length < 20) {
+    ctx.reply('Il testo inserito è troppo corto');
     ctx.deleteMessage(message_id);
     return;
   }
@@ -218,11 +230,11 @@ const confirmDescriptionAndAskForImages = async ctx => {
       return ctx.scene.leave();
     case NEXT_STEP:
       await ctx.reply(
-        "Invia una o piu foto del prodotto, quando hai finito premi sul pulsante 'Avanti'",
-        Markup.keyboard(['Avanti', 'Annulla'])
-          .oneTime()
-          .resize()
-          .extra()
+        "<b>Invia una o piu foto del prodotto</b><em>\nQuando hai finito premi sul pulsante 'Avanti'</em>",
+        {
+          parse_mode: 'HTML',
+          reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
+        }
       );
       return ctx.wizard.next();
     case PREVIOUS_STEP:
@@ -261,10 +273,16 @@ const validateImagesAndAskForPrice = async ctx => {
       return;
     }
 
+    // Delete 'Avanti' message to avoid chat cluttering
+    ctx.deleteMessage(ctx.message.message_id);
+
     // Prompt user to type value
     await ctx.reply(
-      'Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)',
-      Markup.removeKeyboard().extra() // Ask clients to remove keyboard
+      '<b>Inserisci il prezzo richiesto</b>\n<em>Scrivi solo il valore numerico, senza €</em>',
+      {
+        parse_mode: 'HTML',
+        reply_markup: Markup.removeKeyboard(), // Ask clients to remove keyboard
+      }
     );
     return ctx.wizard.next();
   } else if (ctx.message.text === 'Annulla') {
@@ -339,7 +357,8 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
       const paymentMethodsPrompt = getPaymentMethodsMenuMarkup(
         ctx.wizard.state.paymentMethods
       );
-      ctx.reply('Seleziona i metodi di pagamento', {
+      ctx.reply('<b>Seleziona i metodi di pagamento</b>', {
+        parse_mode: 'HTML',
         reply_markup: paymentMethodsPrompt,
       });
       return ctx.wizard.next();
@@ -391,7 +410,8 @@ const updatePaymentMethods = async ctx => {
       });
 
       // Insert announce in DB
-      let announceId, saleAnnounce;
+      let announceId;
+      let saleAnnounce;
       try {
         announceId = await knex('sale_announcements')
           .returning('id')
@@ -403,7 +423,6 @@ const updatePaymentMethods = async ctx => {
           });
       } catch (err) {
         logger.error('Cannot save sale announcement to the database');
-        console.log(err);
       }
 
       media[0].caption = generateCaption(
@@ -426,7 +445,9 @@ const updatePaymentMethods = async ctx => {
         );
         return ctx.scene.leave();
       }
-      ctx.reply(
+      ctx.deleteMessage(ctx.callbackQuery.message.message_id);
+      await ctx.reply('<b>OPERAZIONE COMPLETATA</b>', { parse_mode: 'HTML' });
+      await ctx.reply(
         'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
       );
       return ctx.scene.leave();
