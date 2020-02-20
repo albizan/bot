@@ -5,6 +5,10 @@ const knex = require('./db');
 
 // Import command setups
 const setupCommands = require('./commands');
+
+// Import middleware setups
+const setupMiddleware = require('./middleware');
+
 // Import types
 const {
   SELL_ITEM,
@@ -28,31 +32,14 @@ const {
   SUPPORT_CHAT_SCENE,
 } = require('./types/scenes.types');
 
-// Import Wizards
-const sellItemWizard = require('./wizards/sell');
-const seekItemWizard = require('./wizards/seek');
-
-// Imports Scenes
-const supportChat = require('./scenes/chat.scene');
-
-// Import logger
-const logger = require('./logger');
-
-// import markups
-const { startMenuMarkup } = require('./helper');
-
-// Define administrators, id must be numbers and not strings
-process.env.ADMINS = process.env.ADMINS.split(',').map(admin =>
-  parseInt(admin)
-);
-
-// Compose stage with given scenes
-const stage = new Stage([supportChat, sellItemWizard, seekItemWizard]);
-
+// Create BOT instance
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-bot.use(session());
-bot.use(stage.middleware());
+// Setup Commands
+setupCommands(bot);
+
+// Setup middleware
+setupMiddleware(bot);
 
 // Handle middlewares for callback_data
 bot.action(SELL_ITEM, ctx => {
@@ -129,9 +116,6 @@ bot.action(SUPPORT_CHAT, ctx => {
   ctx.answerCbQuery();
   ctx.scene.enter(SUPPORT_CHAT_SCENE);
 });
-
-// Administration Commands
-setupCommands(bot);
 
 bot.on('message', async ctx => {
   const { id } = ctx.from;
