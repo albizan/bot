@@ -1,7 +1,7 @@
 function setupUnmuteCommand(bot) {
   bot.command('unmute', ctx => {
     const { id } = ctx.from;
-    if (!admins.includes(id)) {
+    if (!process.env.ADMINS.includes(id)) {
       return;
     }
 

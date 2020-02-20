@@ -1,7 +1,7 @@
 function setupApproveCommand(bot) {
   bot.command('approve', async ctx => {
     const { id } = ctx.from;
-    if (!admins.includes(id)) {
+    if (!process.env.ADMINS.includes(id)) {
       return;
     }
 

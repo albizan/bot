@@ -1,7 +1,7 @@
 function setupMuteCommand(bot) {
   bot.command('mute', ctx => {
     const { id } = ctx.from;
-    if (!admins.includes(id)) {
+    if (!process.env.ADMINS.includes(id)) {
       return;
     }
     // If admin specifies the id with command /mute 123456789
