@@ -1,5 +1,5 @@
 exports.up = function(knex) {
-  return knex.schema.createTable('sale_announcements', function(table) {
+  return knex.schema.createTable('insertions', function(table) {
     table
       .increments('id')
       .notNullable()
@@ -7,12 +7,11 @@ exports.up = function(knex) {
     table.string('product').notNullable();
     table.string('category').notNullable();
     table.string('url').nullable();
-    table.text('images').notNullable();
     table
       .boolean('isRemoved')
       .defaultTo(false)
       .notNullable();
-    table.string('user_id').notNullable();
+    table.integer('user_id').notNullable();
 
     table
       .foreign('user_id')
@@ -22,5 +21,5 @@ exports.up = function(knex) {
 };
 
 exports.down = function(knex) {
-  return knex.schema.dropTable('sale_announcements');
+  return knex.schema.dropTable('insertions');
 };
