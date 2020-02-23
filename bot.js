@@ -1,6 +1,4 @@
 const Telegraf = require('telegraf');
-const { Stage, session } = Telegraf;
-const Markup = require('telegraf/markup');
 const knex = require('./db');
 
 // Import command setups
@@ -8,29 +6,6 @@ const setupCommands = require('./commands');
 
 // Import middleware setups
 const setupMiddleware = require('./middleware');
-
-// Import types
-const {
-  SELL_ITEM,
-  SEEK_ITEM,
-  SEARCH,
-  SUPPORT_CHAT,
-  CPU,
-  GPU,
-  RAM,
-  MOBO,
-  PSU,
-  STORAGE,
-  CASE,
-  PERIPHERALS,
-  COMPLETE_PC,
-  OTHER,
-} = require('./types/callbacks.types');
-const {
-  SELL_ITEM_WIZARD,
-  SEEK_ITEM_WIZARD,
-  SUPPORT_CHAT_SCENE,
-} = require('./types/scenes.types');
 
 // Create BOT instance
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -40,82 +15,6 @@ setupCommands(bot);
 
 // Setup middleware
 setupMiddleware(bot);
-
-// Handle middlewares for callback_data
-bot.action(SELL_ITEM, ctx => {
-  ctx.answerCbQuery();
-  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
-  ctx.scene.enter(SELL_ITEM_WIZARD);
-});
-
-bot.action(SEEK_ITEM, ctx => {
-  ctx.answerCbQuery();
-  ctx.scene.enter(SEEK_ITEM_WIZARD);
-});
-
-bot.action(SEARCH, ctx => {
-  ctx.answerCbQuery();
-  ctx.reply('Seleziona la Categoria', {
-    reply_markup: Markup.inlineKeyboard([
-      [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
-      [Markup.callbackButton(RAM, RAM), Markup.callbackButton(MOBO, MOBO)],
-      [
-        Markup.callbackButton(PSU, PSU),
-        Markup.callbackButton(STORAGE, STORAGE),
-      ],
-      [
-        Markup.callbackButton(CASE, CASE),
-        Markup.callbackButton(PERIPHERALS, PERIPHERALS),
-      ],
-      [Markup.callbackButton(COMPLETE_PC, COMPLETE_PC)],
-      [Markup.callbackButton(OTHER, OTHER)],
-    ])
-      .oneTime()
-      .resize(),
-  });
-});
-
-bot.action(CPU, async ctx => {
-  const result = await knex('sale_announcements')
-    .select('product', 'url')
-    .whereNotNull('url')
-    .where({ category: CPU });
-
-  const buttons = result.map(row => [
-    Markup.urlButton(`${row.product}`, row.url),
-  ]);
-  if (buttons.length === 0) {
-    ctx.reply('Nessun annuncio trovato');
-  } else {
-    ctx.reply('CPU attualmente in vendita', {
-      reply_markup: Markup.inlineKeyboard(buttons),
-    });
-  }
-});
-
-bot.action(RAM, ctx => {
-  knex('sale_announcements')
-    .where({ category: RAM })
-    .whereNotNull('url')
-    .then(rows => {
-      const items = rows.map(row => [
-        Markup.urlButton(`${row.title}`, row.url),
-      ]);
-      if (items.length === 0) {
-        ctx.reply('Nessun annuncio trovato');
-      } else {
-        ctx.reply('RAM attualmente in vendita', {
-          reply_markup: Markup.inlineKeyboard(items),
-        });
-      }
-    })
-    .catch(err => console.log(err));
-});
-
-bot.action(SUPPORT_CHAT, ctx => {
-  ctx.answerCbQuery();
-  ctx.scene.enter(SUPPORT_CHAT_SCENE);
-});
 
 bot.on('message', async ctx => {
   const { id } = ctx.from;
@@ -134,7 +33,6 @@ bot.on('message', async ctx => {
   } = reply_to_message;
   // If admin replies to a message that was forwarded by a user
   if (!forward_from && forward_date) {
-    console.log(reply_to_message);
     ctx.reply(
       "Impossibile ottenere l'id dell'utente, inviare il messaggio manualmente con il comando /reply id_utente text_message"
     );

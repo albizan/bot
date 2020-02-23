@@ -13,10 +13,10 @@ const {
 } = require('./emoji');
 // Import callback query types
 const {
-  SELL_ITEM,
+  SELL_PRODUCT,
   SEEK_ITEM,
   SUPPORT_CHAT,
-  SEARCH,
+  SEARCH_PRODUCT,
   HOME,
   NEXT_STEP,
   PREVIOUS_STEP,
@@ -125,10 +125,10 @@ const categoryMenuMarkup = Markup.inlineKeyboard([
 ]).resize();
 
 const startMenuMarkup = Markup.inlineKeyboard([
-  [Markup.callbackButton('Nuovo Annuncio di Vendita', SELL_ITEM)],
-  [Markup.callbackButton('Nuovo Annuncio di Ricerca', SEEK_ITEM)],
-  [Markup.callbackButton('Cerca per Categoria', SEARCH)],
-  [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
+  [Markup.callbackButton('Nuovo Annuncio di Vendita', SELL_PRODUCT)],
+  // [Markup.callbackButton('Nuovo Annuncio di Ricerca', SEEK_ITEM)],
+  [Markup.callbackButton('Cerca per Categoria', SEARCH_PRODUCT)],
+  // [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
 ]).resize();
 
 const upsert = params => {

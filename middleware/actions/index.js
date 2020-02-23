@@ -1,5 +1,9 @@
-const setupSaleProduct = require('./sellProduct.js');
+const setupSellProduct = require('./sellProduct.js');
+const setupSearchProduct = require('./searchProduct.js');
+const setupFindProductsByCategory = require('./findProductByCategory');
 
 module.exports = {
-  setupSaleProduct,
+  setupSellProduct,
+  setupSearchProduct,
+  setupFindProductsByCategory,
 };

@@ -3,7 +3,9 @@ const Telegraf = require('telegraf');
 const { Stage, session } = Telegraf;
 
 // Import Actions (Callback Queries Middleware)
-const { setupSaleProduct } = require('./actions');
+const { setupSellProduct } = require('./actions');
+const { setupSearchProduct } = require('./actions');
+const { setupFindProductsByCategory } = require('./actions');
 
 // Import Wizard Scenes
 const sellProductWizard = require('../wizards/sellProduct');
@@ -20,7 +22,9 @@ function setupMiddleware(bot) {
   bot.use(stage.middleware());
 
   // Handle middlewares for callback_data
-  setupSaleProduct(bot);
+  setupSellProduct(bot);
+  setupSearchProduct(bot);
+  setupFindProductsByCategory(bot);
 }
 
 module.exports = setupMiddleware;

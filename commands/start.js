@@ -49,7 +49,6 @@ function setupStartCommand(bot) {
       If the user is already present (id is the pk) update all the info a user might have changed since the last bot query (username and first_name)
       Using Knex the only way to achieve this is using a raw query
     */
-
     upsert({
       table: 'users',
       object: { id, username, first_name },

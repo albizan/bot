@@ -1,7 +1,7 @@
-exports.SELL_ITEM = 'sell_item';
+exports.SELL_PRODUCT = 'Sell Product';
 exports.SEEK_ITEM = 'seek_item';
 exports.SUPPORT_CHAT = 'support_chat';
-exports.SEARCH = 'SEARCH';
+exports.SEARCH_PRODUCT = 'Search Product';
 exports.NEXT_STEP = 'next_step';
 exports.PREVIOUS_STEP = 'previous_step';
 exports.CLOSE_WIZARD = 'close_wizard';

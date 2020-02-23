@@ -1,4 +1,5 @@
 const Markup = require('telegraf/markup');
+const knex = require('../../db');
 const logger = require('../../logger');
 const {
   sellItemMenuMarkup,
@@ -6,11 +7,6 @@ const {
   getPaymentMethodsMenuMarkup,
   generateCaption,
 } = require('../../helper');
-
-const knex = require('../../db');
-
-// Import sell item wizard type
-const { SELL_ITEM_WIZARD } = require('../../types/scenes.types');
 
 // Import callback query types
 const {
@@ -23,9 +19,6 @@ const {
   CASH,
   TRANSFER,
 } = require('../../types/callbacks.types');
-
-// Import emojis
-const { package, memo, moneyBag } = require('../../emoji');
 
 /*
   Ask For Category
@@ -49,19 +42,19 @@ const askForCategory = ctx => {
 const confirmCategoryAndAskForTitle = ctx => {
   if (!ctx.callbackQuery) {
     if (ctx.message) {
-      const { message_id } = ctx.message;
-      // If user sends random message, delete it in order to avoid chat cluttering
-      ctx.deleteMessage(message_id);
+      // If user sends a message, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(ctx.message.message_id);
     }
     return;
   }
+  // Remove previous message to clean chat from useless old messages
   ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
-  ctx.wizard.state.category = data;
   if (data === HOME) {
     return ctx.scene.leave();
   }
-  ctx.answerCbQuery(`Hai selezionato ${data}`);
+  ctx.wizard.state.category = data;
+  ctx.answerCbQuery();
   ctx.reply(
     '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci minimo 10 e massimo 50 caratteri</i>',
     {
@@ -83,8 +76,7 @@ const validateTitle = async ctx => {
   }
   if (!ctx.message.text) {
     // this could be a gif or a sticker and needs to be deleted in order to avoid chat cluttering
-    const { message_id } = ctx.message;
-    ctx.deleteMessage(message_id);
+    ctx.deleteMessage(ctx.message.message_id);
     return;
   }
   const { text, message_id } = ctx.message;
@@ -111,7 +103,7 @@ const validateTitle = async ctx => {
   ctx.wizard.state.title = text;
 
   // Ask for confirmation
-  await ctx.reply(`<b>Prodotto</b>: ${text}`, {
+  ctx.reply(`<b>Prodotto</b>: ${text}`, {
     reply_markup: sellItemMenuMarkup,
     parse_mode: 'HTML',
   });
@@ -126,9 +118,8 @@ const confirmTitleAndAskForDescription = async ctx => {
   // If not callbackQuery, delete message if possible
   if (!ctx.callbackQuery) {
     if (ctx.message) {
-      const { message_id } = ctx.message;
       // If user sends random message, delete it in order to avoid chat cluttering
-      ctx.deleteMessage(message_id);
+      ctx.deleteMessage(ctx.message.message_id);
     }
     return;
   }
@@ -411,19 +402,21 @@ const updatePaymentMethods = async ctx => {
 
       // Insert announce in DB
       let announceId;
-      let saleAnnounce;
       try {
-        announceId = await knex('sale_announcements')
+        const result = await knex('insertions')
           .returning('id')
           .insert({
             product: ctx.wizard.state.title,
             user_id: id,
             category: ctx.wizard.state.category,
-            images: images.join(','),
+            // images: images.join(','),
           });
+        announceId = result[0];
       } catch (err) {
+        console.log(error);
         logger.error('Cannot save sale announcement to the database');
       }
+      console.log(announceId);
 
       media[0].caption = generateCaption(
         announceId,
@@ -435,10 +428,7 @@ const updatePaymentMethods = async ctx => {
         paymentMethods
       );
       try {
-        saleAnnounce = await ctx.telegram.sendMediaGroup(
-          process.env.SECRET_CHAT_ID,
-          media
-        );
+        ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
       } catch (error) {
         ctx.reply(
           'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'

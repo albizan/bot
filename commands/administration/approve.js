@@ -27,7 +27,7 @@ function setupApproveCommand(bot) {
     // Retieve images of the sale announce from the database
     let image_ids, saleAnnounce;
     try {
-      const result = await knex('sale_announcements')
+      const result = await knex('insertions')
         .select('images')
         .first()
         .where({ id: announceId });
@@ -53,7 +53,7 @@ function setupApproveCommand(bot) {
         saleAnnounce[0].message_id
       }`;
 
-      await knex('sale_announcements')
+      await knex('insertions')
         .where({ id: announceId })
         .update({ url });
 
