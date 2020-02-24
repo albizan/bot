@@ -6,6 +6,7 @@ const {
   categoryMenuMarkup,
   getPaymentMethodsMenuMarkup,
   generateCaption,
+  upsert,
 } = require('../../helper');
 
 // Import callback query types
@@ -379,6 +380,7 @@ const updatePaymentMethods = async ctx => {
   switch (data) {
     case NEXT_STEP:
       if (ctx.wizard.state.paymentMethods.length <= 0) {
+        ctx.answerCbQuery('Seleziona un metodo di pagamento');
         ctx.reply('Seleziona almeno un metodo di pagamento');
         return;
       }
@@ -409,14 +411,25 @@ const updatePaymentMethods = async ctx => {
             product: ctx.wizard.state.title,
             user_id: id,
             category: ctx.wizard.state.category,
-            // images: images.join(','),
           });
         announceId = result[0];
-      } catch (err) {
+      } catch (error) {
         console.log(error);
         logger.error('Cannot save sale announcement to the database');
       }
-      console.log(announceId);
+
+      // Save insertion's images
+      ctx.wizard.state.images.forEach(file_id => {
+        console.log(`Saving ${file_id}`);
+        upsert({
+          table: 'images',
+          object: {
+            file_id,
+            insertion_id: announceId,
+          },
+          constraint: '(file_id)',
+        });
+      });
 
       media[0].caption = generateCaption(
         announceId,
