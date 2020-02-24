@@ -18,6 +18,7 @@ const {
 function setupSearchProduct(bot) {
   bot.action(SEARCH_PRODUCT, ctx => {
     ctx.answerCbQuery();
+    ctx.deleteMessage(ctx.update.callback_query.message.message_id);
     ctx.reply('Seleziona la Categoria', {
       reply_markup: Markup.inlineKeyboard([
         [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],

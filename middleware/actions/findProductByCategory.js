@@ -1,3 +1,6 @@
+// Import Markup
+const Markup = require('telegraf/markup');
+
 // Import Database
 const knex = require('../../db');
 
@@ -13,6 +16,8 @@ const {
   PERIPHERALS,
   COMPLETE_PC,
   OTHER,
+  HOME,
+  SEARCH_PRODUCT,
 } = require('../../types/callbacks.types');
 
 function setupFindProductsByCategory(bot) {
@@ -22,6 +27,7 @@ function setupFindProductsByCategory(bot) {
     async ctx => {
       const trigger = ctx.match;
       ctx.answerCbQuery();
+      ctx.deleteMessage(ctx.update.callback_query.message.message_id);
       const result = await knex('insertions')
         .select('product', 'url')
         .whereNotNull('url')
@@ -32,10 +38,26 @@ function setupFindProductsByCategory(bot) {
       ]);
 
       if (productsAsButtons.length === 0) {
-        ctx.reply(`Nessun annuncio trovato per ${trigger}`);
+        await ctx.reply(`${trigger}: nessun prodotto attualmente in vendita`);
+        ctx.reply('Seleziona una opzione', {
+          reply_markup: Markup.inlineKeyboard([
+            [
+              Markup.callbackButton('Indietro', SEARCH_PRODUCT),
+              Markup.callbackButton(`Home`, HOME),
+            ],
+          ]).resize(),
+        });
       } else {
-        ctx.reply(`Prodotti attualmente in vendita per categoria: ${trigger}`, {
+        await ctx.reply(`Prodotti attualmente in vendita`, {
           reply_markup: Markup.inlineKeyboard(productsAsButtons),
+        });
+        ctx.reply('Seleziona una opzione', {
+          reply_markup: Markup.inlineKeyboard([
+            [
+              Markup.callbackButton('Indietro', SEARCH_PRODUCT),
+              Markup.callbackButton(`Home`, HOME),
+            ],
+          ]).resize(),
         });
       }
     }
