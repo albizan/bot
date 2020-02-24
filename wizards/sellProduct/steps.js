@@ -420,7 +420,6 @@ const updatePaymentMethods = async ctx => {
 
       // Save insertion's images
       ctx.wizard.state.images.forEach(file_id => {
-        console.log(`Saving ${file_id}`);
         upsert({
           table: 'images',
           object: {
