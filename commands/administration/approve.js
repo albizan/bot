@@ -65,7 +65,6 @@ function setupApproveCommand(bot) {
       ctx.reply(
         'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
       );
-      return ctx.scene.leave();
     }
   });
 }
