@@ -121,6 +121,3 @@ temp/
 # End of https://www.gitignore.io/api/node,visualstudiocode
 
 .directory
-
-load-env.sh
-wait-for-it.sh
