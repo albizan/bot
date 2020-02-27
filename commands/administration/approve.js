@@ -19,11 +19,15 @@ function setupApproveCommand(bot) {
       return;
     }
     // Get announce id from caption's entities
-    const entity = reply_to_message.caption_entities[2];
+    let entities = reply_to_message.caption_entities;
+
+    //Filter hashtag
+    entities = entities.filter(entity => entity.type === 'hashtag');
+    const insertionIdEntity = entities[1];
     const insertionId = reply_to_message.caption.substring(
       // offset + 3 in order to remove '#av'
-      entity.offset + 3,
-      entity.offset + entity.length
+      insertionIdEntity.offset + 3,
+      insertionIdEntity.offset + insertionIdEntity.length
     );
 
     // Retieve insertion's images from db
