@@ -36,15 +36,19 @@ function setupApproveCommand(bot) {
       console.log(error);
       console.log('Cannot retreive images for current insertion');
     }
-    // generate again array of inputMediaPhoto to be sent with sendMediaGroup to channel
-    const media = image_ids.map(({ file_id }) => {
-      return {
-        type: 'photo',
-        media: file_id,
-      };
-    });
-    media[0].caption = reply_to_message.caption;
+
     try {
+      // generate again array of inputMediaPhoto to be sent with sendMediaGroup to channel
+      const media = image_ids.map(({ file_id }) => {
+        return {
+          type: 'photo',
+          media: file_id,
+        };
+      });
+      if (media[0]) {
+        media[0].caption = reply_to_message.caption;
+      }
+
       insertion = await ctx.telegram.sendMediaGroup(
         process.env.CHANNEL_USERNAME,
         media
