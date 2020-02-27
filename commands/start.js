@@ -30,7 +30,7 @@ function setupStartCommand(bot) {
     try {
       ctx.telegram.sendMessage(
         id,
-        `Ciao <b>${first_name}</b>\n\nBenvenuto nel mercatino del gruppo <i>"PC Building Italia"</i>`,
+        `Ciao <b>${first_name}</b>\n\nBenvenuto nel mercatino del gruppo <i>"MiT - Mercatino di vendita e ricerca"</i> che puoi trovare <a href="https://t.me/joinchat/BUc_2U-1GRQClo4MllBuFA">qui</a>`,
         {
           reply_markup: startMenuMarkup,
           parse_mode: 'HTML',
@@ -38,7 +38,7 @@ function setupStartCommand(bot) {
       );
     } catch (error) {
       ctx.reply(
-        'Sono un BOT, non posso contattarti in privato se prima non vai su @nas_bot_test e clicchi su avvia'
+        'Sono un BOT, non posso contattarti in privato se prima non vai su @mitricvenbot e clicchi su avvia'
       );
       return;
     }
