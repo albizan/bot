@@ -22,15 +22,15 @@ function setupStartCommand(bot) {
 
     /* 
       Send welcome message to user
-      Users can use /start command even in groups.
-      If the users did not start the bot before sending the /start command in a group an error is thrown, this is because bots cannot start chat with users.
-      If this is the case, reply to user in the chat informing him to start the bot in his private chat
+      Users can use /start or /home command even in groups.
+      If the users did not start the bot before sending the /start command in a group, an error is thrown, this is because BOTs cannot start messagging with users.
+      If this is the case, reply to user informing him to start the bot in his private chat
     */
 
     try {
       ctx.telegram.sendMessage(
         id,
-        `Ciao <b>${first_name}</b>\n\nBenvenuto nel mercatino del gruppo <i>"MiT - Mercatino di vendita e ricerca"</i> che puoi trovare <a href="https://t.me/joinchat/BUc_2U-1GRQClo4MllBuFA">qui</a>`,
+        `Ciao <b>${first_name}</b>\n\nBenvenuto nel BOT ufficiale del gruppo <a href="https://t.me/joinchat/BUc_2U-1GRQClo4MllBuFA">MIT - Mercatino Informatica e Tecnologia</a>\n\nTi ricordo che in qualunque momento puoi inviare il comando /home per aprire il <i>Menu Principale</i>\nQuesto bot ti permette di creare annunci di vendita per le tue componenti informatiche e non solo. Tutti gli annunci, prima di essere pubblicati sul canale ufficiale @mitvendita, verranno valutati ed eventualmente approvati dallo <b>STAFF</b>`,
         {
           reply_markup: startMenuMarkup,
           parse_mode: 'HTML',
@@ -49,11 +49,15 @@ function setupStartCommand(bot) {
       If the user is already present (id is the pk) update all the info a user might have changed since the last bot query (username and first_name)
       Using Knex the only way to achieve this is using a raw query
     */
-    upsert({
-      table: 'users',
-      object: { id, username, first_name },
-      constraint: '(id)',
-    });
+    try {
+      upsert({
+        table: 'users',
+        object: { id, username, first_name },
+        constraint: '(id)',
+      });
+    } catch (error) {
+      logger.error(error);
+    }
   });
 }
 
