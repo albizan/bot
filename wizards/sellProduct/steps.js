@@ -151,7 +151,7 @@ const confirmTitleAndAskForDescription = async ctx => {
 };
 
 /*
-  Step 4 of Wizard - Validate description
+  Validate description
   Validate user's response (updates othen than text messages are deleted)
   Update wizard's state with given description
   Show description and prompt user for confirmation
@@ -199,7 +199,7 @@ const validateDescription = async ctx => {
 };
 
 /*
-  Step 5 of Wizard - Ask For Images
+  Ask For Images
   Validate user's response (only callback_queries are accepted)
   Based on callback_query make decisions:
     If user confirms, ask for images, wait for user's input and then go to next step
@@ -270,7 +270,7 @@ const validateImagesAndAskForPrice = async ctx => {
 
     // Prompt user to type value
     await ctx.reply(
-      '<b>Inserisci il prezzo richiesto</b>\n<em>Scrivi solo il valore numerico, senza €</em>',
+      '<b>Inserisci il prezzo richiesto</b>\n<em>Scrivi solo il valore numerico, senza €\nIl valore massimo è 10.000€</em>',
       {
         parse_mode: 'HTML',
         reply_markup: Markup.removeKeyboard(), // Ask clients to remove keyboard
@@ -315,7 +315,14 @@ const priceValidation = async ctx => {
 
   const { text } = ctx.message;
   // Convert string into a floating point number
-  ctx.wizard.state.value = parseFloat(text.replace(',', '.'));
+  const receivedValue = parseFloat(text.replace(',', '.'));
+  if (receivedValue > 10000) {
+    ctx.reply(
+      'Il prezzo non deve superare 10000€\n<b>Inserisci il prezzo richiesto</b>'
+    );
+    return;
+  }
+  ctx.wizard.state.value = receivedValue;
   await ctx.reply(`<b>Prezzo:</b> ${ctx.wizard.state.value}€`, {
     reply_markup: sellItemMenuMarkup,
     parse_mode: 'HTML',
