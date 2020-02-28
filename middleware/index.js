@@ -2,6 +2,9 @@
 const Telegraf = require('telegraf');
 const { Stage, session } = Telegraf;
 
+// Import time check middleware
+const ignoreOldUpdates = require('./ignoreOldUpdates');
+
 // Import Actions (Callback Queries Middleware)
 const {
   setupSellProduct,
@@ -21,6 +24,7 @@ const supportChat = require('../scenes/chat.scene');
 const stage = new Stage([supportChat, sellProductWizard, seekItemWizard]);
 
 function setupMiddleware(bot) {
+  bot.use(ignoreOldUpdates);
   bot.use(session());
   bot.use(stage.middleware());
 
