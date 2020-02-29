@@ -19,6 +19,16 @@ const {
   HYPE,
   CASH,
   TRANSFER,
+  CPU,
+  GPU,
+  RAM,
+  MOBO,
+  PSU,
+  STORAGE,
+  CASE,
+  PERIPHERALS,
+  COMPLETE_PC,
+  OTHER,
 } = require('../../types/callbacks.types');
 
 /*
@@ -49,10 +59,27 @@ const confirmCategoryAndAskForTitle = ctx => {
     return;
   }
   // Remove previous message to clean chat from useless old messages
-  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
+  // ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
   if (data === HOME) {
     return ctx.scene.leave();
+  }
+
+  if (
+    ![
+      CPU,
+      GPU,
+      RAM,
+      MOBO,
+      PSU,
+      STORAGE,
+      CASE,
+      PERIPHERALS,
+      COMPLETE_PC,
+      OTHER,
+    ].includes(data)
+  ) {
+    return;
   }
   ctx.wizard.state.category = data;
   ctx.answerCbQuery();
@@ -125,7 +152,7 @@ const confirmTitleAndAskForDescription = async ctx => {
     return;
   }
   ctx.answerCbQuery();
-  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
+  // ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
@@ -346,7 +373,7 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
     return;
   }
   ctx.answerCbQuery();
-  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
+  // ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
   switch (data) {
     case CLOSE_WIZARD:
@@ -399,7 +426,7 @@ const updatePaymentMethods = async ctx => {
         category,
         paymentMethods,
       } = ctx.wizard.state;
-      const { username, id } = ctx.from;
+      const { username, id, first_name } = ctx.from;
 
       // generate array of inputMediaPhoto to be sent with sendMediaGroup
       const media = images.map(file_id => {
@@ -408,6 +435,20 @@ const updatePaymentMethods = async ctx => {
           media: file_id,
         };
       });
+
+      try {
+        await upsert({
+          table: 'users',
+          object: { id, username, first_name },
+          constraint: '(id)',
+        });
+      } catch (error) {
+        ctx.reply(
+          'Qualcosa è andato storto, il bot potrebbe essere in manutenzione, riprova piu tardi'
+        );
+        ctx.scene.leave();
+        logger.error(error);
+      }
 
       // Insert announce in DB
       let announceId;
@@ -419,22 +460,33 @@ const updatePaymentMethods = async ctx => {
             user_id: id,
             category: ctx.wizard.state.category,
           });
+        console.log(result);
         announceId = result[0];
       } catch (error) {
+        ctx.reply(
+          'Qualcosa è andato storto, il bot potrebbe essere in manutenzione, riprova piu tardi'
+        );
+        ctx.scene.leave();
         console.log(error);
         logger.error('Cannot save sale announcement to the database');
       }
 
+      console.log(announceId);
+
       // Save insertion's images
       ctx.wizard.state.images.forEach(file_id => {
-        upsert({
-          table: 'images',
-          object: {
-            file_id,
-            insertion_id: announceId,
-          },
-          constraint: '(file_id)',
-        });
+        try {
+          upsert({
+            table: 'images',
+            object: {
+              file_id,
+              insertion_id: announceId,
+            },
+            constraint: '(file_id)',
+          });
+        } catch (error) {
+          console.log(error);
+        }
       });
 
       media[0].caption = generateCaption(
@@ -454,7 +506,7 @@ const updatePaymentMethods = async ctx => {
         );
         return ctx.scene.leave();
       }
-      ctx.deleteMessage(ctx.callbackQuery.message.message_id);
+      // ctx.deleteMessage(ctx.callbackQuery.message.message_id);
       await ctx.reply('<b>OPERAZIONE COMPLETATA</b>', { parse_mode: 'HTML' });
       await ctx.reply(
         'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
