@@ -30,7 +30,7 @@ function setupStartCommand(bot) {
     try {
       ctx.telegram.sendMessage(
         id,
-        `Ciao <b>${first_name}</b>\n\nBenvenuto nel BOT ufficiale del gruppo <a href="https://t.me/joinchat/BUc_2U-1GRQClo4MllBuFA">MIT - Mercatino Informatica e Tecnologia</a>\n\nTi ricordo che in qualunque momento puoi tornare in questo menu con il comando /home\nQuesto bot ti permette di creare annunci di vendita per le tue componenti informatiche e non solo. Tutti gli annunci, prima di essere pubblicati sul canale ufficiale @mitvendita, verranno valutati ed eventualmente approvati dallo <b>STAFF</b>`,
+        `Ciao <b>${first_name}</b>\n\nBenvenuto/a nel BOT ufficiale del gruppo <a href="https://t.me/joinchat/BUc_2U-1GRQClo4MllBuFA">MIT - Mercatino Informatica e Tecnologia</a>\n\nTi ricordo che in qualunque momento puoi tornare in questo menu con il comando /home\nQuesto bot ti permette di creare annunci di vendita per le tue componenti informatiche e non solo. Tutti gli annunci, prima di essere pubblicati sul canale ufficiale @mitvendita, verranno valutati ed eventualmente approvati dallo <b>STAFF</b>`,
         {
           reply_markup: startMenuMarkup,
           parse_mode: 'HTML',
