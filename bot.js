@@ -16,7 +16,7 @@ setupCommands(bot);
 // Setup middleware
 setupMiddleware(bot);
 
-bot.on('message', async ctx => {
+/*bot.command('reply', async ctx => {
   const { id } = ctx.from;
   if (!process.env.ADMINS.includes(id)) {
     return;
@@ -68,6 +68,6 @@ bot.on('message', async ctx => {
       console.log(error);
     }
   }
-});
+});*/
 
 module.exports = bot;
