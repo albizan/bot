@@ -14,14 +14,14 @@ const {
 } = require('./actions');
 
 // Import Wizard Scenes
-const sellProductWizard = require('../wizards/sellProduct');
+const newInsertionWizard = require('../wizards/newInsertion');
 const seekItemWizard = require('../wizards/seek');
 
 // Imports Base Scenes
 const supportChat = require('../scenes/chat.scene');
 
 // Compose stage with given scenes
-const stage = new Stage([supportChat, sellProductWizard, seekItemWizard]);
+const stage = new Stage([supportChat, newInsertionWizard, seekItemWizard]);
 
 function setupMiddleware(bot) {
   bot.use(ignoreOldUpdates);
