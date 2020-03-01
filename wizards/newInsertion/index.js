@@ -33,7 +33,7 @@ const sellProductWizard = new WizardScene(
   updatePaymentMethods
 );
 
-sellProductWizard.command(['home', 'quit'], ctx => {
+sellProductWizard.command(['home', 'quit', 'start'], ctx => {
   return ctx.scene.leave();
 });
 

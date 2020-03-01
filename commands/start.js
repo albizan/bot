@@ -8,7 +8,7 @@ const logger = require('../logger');
 const { upsert, getWelcomeMessage } = require('../helper');
 
 function setupStartCommand(bot) {
-  bot.command(['start', 'home'], async ctx => {
+  bot.command(['start'], async ctx => {
     // Extract user's info and check if required fields are present. If they are not, tell user what's missing and return.
     const { id, username, first_name } = ctx.from;
     if (!username) {
