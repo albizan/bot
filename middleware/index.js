@@ -6,18 +6,13 @@ const { Stage, session } = Telegraf;
 const ignoreOldUpdates = require('./ignoreOldUpdates');
 
 // Import Actions (Callback Queries Middleware)
-const {
-  setupSellProduct,
-  setupHome,
-  setupFindProductsByCategory,
-  setupSearchProduct,
-} = require('./actions');
+const setupActions = require('./actions');
 
 // Import Wizard Scenes
 const newInsertionWizard = require('../wizards/newInsertion');
 const seekItemWizard = require('../wizards/seek');
 
-// Imports Base Scenes
+// Imports Support Chat Scenes
 const supportChat = require('../scenes/chat.scene');
 
 // Compose stage with given scenes
@@ -26,13 +21,11 @@ const stage = new Stage([supportChat, newInsertionWizard, seekItemWizard]);
 function setupMiddleware(bot) {
   bot.use(ignoreOldUpdates);
   bot.use(session());
+  // This has to come before commands setup to avoid bot commands to override wizard specific commands
   bot.use(stage.middleware());
 
-  // Handle middlewares for callback_data
-  setupHome(bot);
-  setupSellProduct(bot);
-  setupSearchProduct(bot);
-  setupFindProductsByCategory(bot);
+  // Handle middlewares for callback_data also known as actions
+  setupActions(bot);
 }
 
 module.exports = setupMiddleware;
