@@ -1,5 +1,4 @@
 const Telegraf = require('telegraf');
-const knex = require('./db');
 
 // Import command setups
 const setupCommands = require('./commands');
@@ -10,11 +9,11 @@ const setupMiddleware = require('./middleware');
 // Create BOT instance
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// Setup Commands
-setupCommands(bot);
-
 // Setup middleware
 setupMiddleware(bot);
+
+// Setup Commands
+setupCommands(bot);
 
 /*bot.command('reply', async ctx => {
   const { id } = ctx.from;
