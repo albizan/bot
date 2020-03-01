@@ -40,7 +40,8 @@ function setupStartCommand(bot) {
       If this is the case, reply to user informing him to start the bot in his private chat
     */
     try {
-      ctx.telegram.sendMessage(id, getWelcomeMessage(first_name), {
+      const message = getWelcomeMessage(first_name);
+      ctx.telegram.sendMessage(id, message, {
         reply_markup: startMenuMarkup,
         parse_mode: 'HTML',
       });
@@ -48,6 +49,7 @@ function setupStartCommand(bot) {
       ctx.reply(
         'Sono un BOT, non posso contattarti in privato se prima non vai su @mitricvenbot e clicchi su avvia'
       );
+      console.log(error);
       return;
     }
   });
