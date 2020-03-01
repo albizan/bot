@@ -1,7 +1,10 @@
-exports.SELL_PRODUCT = 'Sell Product';
-exports.SEEK_ITEM = 'seek_item';
+// Main Menu
+exports.NEW_INSERTION = 'Sell Product';
+exports.SEARCH_INSERTION = 'Search Inserion';
+exports.BOT_INFO = 'Bot Info';
+
 exports.SUPPORT_CHAT = 'support_chat';
-exports.SEARCH_PRODUCT = 'Search Product';
+exports.SEEK_ITEM = 'seek_item';
 exports.NEXT_STEP = 'next_step';
 exports.PREVIOUS_STEP = 'previous_step';
 exports.CLOSE_WIZARD = 'close_wizard';

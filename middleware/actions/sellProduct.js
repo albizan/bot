@@ -1,12 +1,12 @@
 // Import types
-const { SELL_PRODUCT } = require('../../types/callbacks.types');
-const { SELL_PRODUCT_WIZARD } = require('../../types/scenes.types');
+const { NEW_INSERTION } = require('../../types/callbacks.types');
+const { NEW_INSERTION_WIZARD } = require('../../types/scenes.types');
 
-function setupSellProduct(bot) {
-  bot.action(SELL_PRODUCT, ctx => {
+function setupNewInsertion(bot) {
+  bot.action(NEW_INSERTION, ctx => {
     ctx.answerCbQuery();
-    ctx.scene.enter(SELL_PRODUCT_WIZARD);
+    ctx.scene.enter(NEW_INSERTION_WIZARD);
   });
 }
 
-module.exports = setupSellProduct;
+module.exports = setupNewInsertion;

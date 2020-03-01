@@ -14,12 +14,12 @@ const {
   updatePaymentMethods,
 } = require('./steps');
 
-const { SELL_PRODUCT_WIZARD } = require('../../types/scenes.types');
+const { NEW_INSERTION_WIZARD } = require('../../types/scenes.types');
 
 // A wizard is a special type of scene
 const sellProductWizard = new WizardScene(
   // Wizard's name
-  SELL_PRODUCT_WIZARD,
+  NEW_INSERTION_WIZARD,
   // Steps
   askForCategory,
   confirmCategoryAndAskForTitle,

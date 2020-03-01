@@ -13,10 +13,11 @@ const {
 } = require('./emoji');
 // Import callback query types
 const {
-  SELL_PRODUCT,
+  NEW_INSERTION,
+  BOT_INFO,
   SEEK_ITEM,
   SUPPORT_CHAT,
-  SEARCH_PRODUCT,
+  SEARCH_INSERTION,
   HOME,
   NEXT_STEP,
   PREVIOUS_STEP,
@@ -128,9 +129,10 @@ const categoryMenuMarkup = Markup.inlineKeyboard([
 ]).resize();
 
 const startMenuMarkup = Markup.inlineKeyboard([
-  [Markup.callbackButton('Nuovo Annuncio di Vendita', SELL_PRODUCT)],
+  [Markup.callbackButton('Nuovo Annuncio di Vendita', NEW_INSERTION)],
   // [Markup.callbackButton('Nuovo Annuncio di Ricerca', SEEK_ITEM)],
-  [Markup.callbackButton('Cerca per Categoria', SEARCH_PRODUCT)],
+  [Markup.callbackButton('Cerca per Categoria', SEARCH_INSERTION)],
+  [Markup.callbackButton('Info sul BOT', BOT_INFO)],
   // [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
 ]).resize();
 

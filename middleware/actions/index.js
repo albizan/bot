@@ -1,13 +1,15 @@
 const setupHome = require('./home');
-const setupSellProduct = require('./sellProduct.js');
+const setupNewInsertion = require('./sellProduct.js');
 const setupSearchProduct = require('./searchProduct.js');
 const setupFindProductsByCategory = require('./findProductByCategory');
+const setupBotInfo = require('./botInfo');
 
 const setupActions = bot => {
   setupHome(bot);
-  setupSellProduct(bot);
+  setupNewInsertion(bot);
   setupSearchProduct(bot);
   setupFindProductsByCategory(bot);
+  setupBotInfo(bot);
 };
 
 module.exports = setupActions;
