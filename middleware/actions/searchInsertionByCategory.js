@@ -1,8 +1,13 @@
 const Markup = require('telegraf/markup');
+const {
+  SEARCH_INSERTION_BY_CATEGORY_WIZARD,
+} = require('../../types/scenes.types');
+
+const logger = require('../../logger');
 
 // Import types
 const {
-  SEARCH_INSERTION,
+  SEARCH_INSERTION_BY_CATEGORY,
   CPU,
   GPU,
   RAM,
@@ -15,10 +20,13 @@ const {
   OTHER,
 } = require('../../types/callbacks.types');
 
-function setupSearchProduct(bot) {
-  bot.action(SEARCH_INSERTION, ctx => {
+function setupSearchInsertionByCategory(bot) {
+  bot.action(SEARCH_INSERTION_BY_CATEGORY, ctx => {
+    logger.info(`${SEARCH_INSERTION_BY_CATEGORY} CallbackQuery Button Pressed`);
     ctx.answerCbQuery();
-    ctx.reply('Seleziona la Categoria', {
+    ctx.scene.enter(SEARCH_INSERTION_BY_CATEGORY_WIZARD);
+
+    /*ctx.reply('Seleziona la Categoria', {
       reply_markup: Markup.inlineKeyboard([
         [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
         [Markup.callbackButton(RAM, RAM), Markup.callbackButton(MOBO, MOBO)],
@@ -35,8 +43,8 @@ function setupSearchProduct(bot) {
       ])
         .oneTime()
         .resize(),
-    });
+    });*/
   });
 }
 
-module.exports = setupSearchProduct;
+module.exports = setupSearchInsertionByCategory;

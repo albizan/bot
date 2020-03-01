@@ -17,7 +17,7 @@ const {
   COMPLETE_PC,
   OTHER,
   HOME,
-  SEARCH_INSERTION,
+  SEARCH_INSERTION_BY_CATEGORY,
 } = require('../../types/callbacks.types');
 
 function setupFindProductsByCategory(bot) {
@@ -42,7 +42,7 @@ function setupFindProductsByCategory(bot) {
         ctx.reply('Seleziona una opzione', {
           reply_markup: Markup.inlineKeyboard([
             [
-              Markup.callbackButton('Indietro', SEARCH_INSERTION),
+              Markup.callbackButton('Indietro', SEARCH_INSERTION_BY_CATEGORY),
               Markup.callbackButton(`Home`, HOME),
             ],
           ]).resize(),
@@ -54,7 +54,7 @@ function setupFindProductsByCategory(bot) {
         ctx.reply('Seleziona una opzione', {
           reply_markup: Markup.inlineKeyboard([
             [
-              Markup.callbackButton('Indietro', SEARCH_INSERTION),
+              Markup.callbackButton('Indietro', SEARCH_INSERTION_BY_CATEGORY),
               Markup.callbackButton(`Home`, HOME),
             ],
           ]).resize(),

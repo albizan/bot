@@ -17,7 +17,7 @@ const {
   BOT_INFO,
   SEEK_ITEM,
   SUPPORT_CHAT,
-  SEARCH_INSERTION,
+  SEARCH_INSERTION_BY_CATEGORY,
   HOME,
   NEXT_STEP,
   PREVIOUS_STEP,
@@ -131,7 +131,7 @@ const categoryMenuMarkup = Markup.inlineKeyboard([
 const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Nuovo Annuncio di Vendita', NEW_INSERTION)],
   // [Markup.callbackButton('Nuovo Annuncio di Ricerca', SEEK_ITEM)],
-  [Markup.callbackButton('Cerca per Categoria', SEARCH_INSERTION)],
+  [Markup.callbackButton('Cerca per Categoria', SEARCH_INSERTION_BY_CATEGORY)],
   [Markup.callbackButton('Info sul BOT', BOT_INFO)],
   // [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
 ]).resize();

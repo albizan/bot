@@ -1,6 +1,6 @@
 // Main Menu
 exports.NEW_INSERTION = 'Sell Product';
-exports.SEARCH_INSERTION = 'Search Inserion';
+exports.SEARCH_INSERTION_BY_CATEGORY = 'Search Inserion';
 exports.BOT_INFO = 'Bot Info';
 
 exports.SUPPORT_CHAT = 'support_chat';
