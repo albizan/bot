@@ -24,3 +24,15 @@ exports.CASE = 'Case';
 exports.PERIPHERALS = 'Accessori';
 exports.COMPLETE_PC = 'PC Completo';
 exports.OTHER = 'Altro';
+exports.categories = {
+  CPU: 'Processori',
+  GPU: 'Schede Video',
+  RAM: 'RAM',
+  MOBO: 'Scheda Madre',
+  PSU: 'Alimentatori',
+  STORAGE: 'Storage',
+  CASE: 'Case',
+  PERIPHERALS: 'Accessori',
+  COMPLETE_PC: 'PC Completo',
+  OTHER: 'Altro',
+};
