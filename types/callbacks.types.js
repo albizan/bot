@@ -14,6 +14,7 @@ exports.HYPE = 'hype';
 exports.CASH = 'cash';
 exports.TRANSFER = 'transfer';
 
+// These need to be removed
 exports.CPU = 'Processori';
 exports.GPU = 'Schede Video';
 exports.RAM = 'RAM';
@@ -24,6 +25,7 @@ exports.CASE = 'Case';
 exports.PERIPHERALS = 'Accessori';
 exports.COMPLETE_PC = 'PC Completo';
 exports.OTHER = 'Altro';
+
 exports.categories = {
   CPU: 'Processori',
   GPU: 'Schede Video',
