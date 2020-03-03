@@ -3,14 +3,7 @@ const Markup = require('telegraf/markup');
 // Import Database
 const knex = require('./db');
 
-const {
-  package,
-  memo,
-  moneyBag,
-  moneyFly,
-  silhouette,
-  checkMark,
-} = require('./emoji');
+const { package, memo, moneyBag, moneyFly, silhouette, checkMark, conditions } = require('./emoji');
 // Import callback query types
 const {
   NEW_INSERTION,
@@ -38,16 +31,9 @@ const {
   OTHER,
 } = require('./types/callbacks.types');
 
-const generateCaption = (
-  insertionId,
-  category,
-  username,
-  title,
-  description,
-  value,
-  paymentMethods
-) => {
+const generateCaption = (insertionId, category, username, title, description, value, paymentMethods, condition) => {
   return `\n${package} Prodotto ${package}\n${title}
+    \n${conditions} Condizione ${conditions}\n${condition}
     \n${memo} Descrizione ${memo}\n${description}
     \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€ (SS Escluse)
     \n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(', ')}
@@ -57,15 +43,7 @@ const generateCaption = (
     \n#av${insertionId}`;
 };
 
-const generateSearchAnnouncement = (
-  first_name,
-  username,
-  id,
-  title,
-  description,
-  price,
-  paymentMethods
-) => {
+const generateSearchAnnouncement = (first_name, username, id, title, description, price, paymentMethods) => {
   return `<b>NUOVO ANNUNCIO DI RICERCA</b>\n\n${package} Prodotto: ${package}\n${title}
     \n\n${memo} Descrizione ${memo}\n${description}
     \n\n${moneyBag} Prezzo: ${moneyBag}\n${price}€
@@ -90,29 +68,14 @@ const getPaymentMethodsMenuMarkup = paymentMethods => {
 const generatePaymentsInlineKeyboard = paymentMethods => {
   return [
     [
-      Markup.callbackButton(
-        `${paymentMethods.includes('Paypal') ? checkMark : ''} Paypal`,
-        PAYPAL
-      ),
-      Markup.callbackButton(
-        `${paymentMethods.includes('Hype') ? checkMark : ''} Hype`,
-        HYPE
-      ),
+      Markup.callbackButton(`${paymentMethods.includes('Paypal') ? checkMark : ''} Paypal`, PAYPAL),
+      Markup.callbackButton(`${paymentMethods.includes('Hype') ? checkMark : ''} Hype`, HYPE),
     ],
     [
-      Markup.callbackButton(
-        `${paymentMethods.includes('Contante') ? checkMark : ''} Contante`,
-        CASH
-      ),
-      Markup.callbackButton(
-        `${paymentMethods.includes('Bonifico') ? checkMark : ''} Bonifico`,
-        TRANSFER
-      ),
+      Markup.callbackButton(`${paymentMethods.includes('Contante') ? checkMark : ''} Contante`, CASH),
+      Markup.callbackButton(`${paymentMethods.includes('Bonifico') ? checkMark : ''} Bonifico`, TRANSFER),
     ],
-    [
-      Markup.callbackButton('Annulla', CLOSE_WIZARD),
-      Markup.callbackButton('Avanti', NEXT_STEP),
-    ],
+    [Markup.callbackButton('Annulla', CLOSE_WIZARD), Markup.callbackButton('Avanti', NEXT_STEP)],
   ];
 };
 
@@ -120,10 +83,7 @@ const categoryMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
   [Markup.callbackButton(PSU, PSU), Markup.callbackButton(MOBO, MOBO)],
   [Markup.callbackButton(RAM, RAM), Markup.callbackButton(STORAGE, STORAGE)],
-  [
-    Markup.callbackButton(COMPLETE_PC, COMPLETE_PC),
-    Markup.callbackButton(PERIPHERALS, PERIPHERALS),
-  ],
+  [Markup.callbackButton(COMPLETE_PC, COMPLETE_PC), Markup.callbackButton(PERIPHERALS, PERIPHERALS)],
   [Markup.callbackButton(CASE, CASE), Markup.callbackButton(OTHER, OTHER)],
   [Markup.callbackButton(HOME, HOME)],
 ]).resize();
