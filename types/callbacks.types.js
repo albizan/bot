@@ -38,3 +38,11 @@ exports.categories = {
   COMPLETE_PC: 'PC Completo',
   OTHER: 'Altro',
 };
+
+exports.conditions = {
+  LIKE_NEW: 'Come Nuovo',
+  VERY_GOOD: 'Ottime Condizioni',
+  GOOD: 'Buone Condizioni',
+  ACCEPTABLE: 'Accettabile',
+  BROKEN: 'Rotto/Pezzi di Ricambio',
+};

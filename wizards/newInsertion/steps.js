@@ -29,14 +29,9 @@ const {
   PERIPHERALS,
   COMPLETE_PC,
   OTHER,
+  conditions,
 } = require('../../types/callbacks.types');
 
-/*
-  Ask For Category
-  Initialize wizard's state for current wizard instance.
-  The state will be automatically deleted when leaving the wizard with ctx.scene.leave()
-  Prompt user to click on category button
-*/
 const askForCategory = ctx => {
   ctx.wizard.state = {};
   ctx.reply('<b>Seleziona una categoria</b>', {
@@ -46,10 +41,6 @@ const askForCategory = ctx => {
   return ctx.wizard.next();
 };
 
-/*
-  Wait for user's callback query and update state
-  Ask for title
-*/
 const confirmCategoryAndAskForTitle = ctx => {
   if (!ctx.callbackQuery) {
     if (ctx.message) {
@@ -65,39 +56,17 @@ const confirmCategoryAndAskForTitle = ctx => {
     return ctx.scene.leave();
   }
 
-  if (
-    ![
-      CPU,
-      GPU,
-      RAM,
-      MOBO,
-      PSU,
-      STORAGE,
-      CASE,
-      PERIPHERALS,
-      COMPLETE_PC,
-      OTHER,
-    ].includes(data)
-  ) {
+  if (![CPU, GPU, RAM, MOBO, PSU, STORAGE, CASE, PERIPHERALS, COMPLETE_PC, OTHER].includes(data)) {
     return;
   }
   ctx.wizard.state.category = data;
   ctx.answerCbQuery();
-  ctx.reply(
-    '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci minimo 10 e massimo 50 caratteri</i>',
-    {
-      parse_mode: 'HTML',
-    }
-  );
+  ctx.reply('<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci minimo 10 e massimo 50 caratteri</i>', {
+    parse_mode: 'HTML',
+  });
   return ctx.wizard.next();
 };
 
-/*
-  Validate Title
-  Validate user's response (updates othen than text messages are deleted)
-  Update wizard's state with given title
-  Show Title and prompt user for confirmation
-*/
 const validateTitle = async ctx => {
   if (!ctx.message) {
     return;
@@ -138,10 +107,6 @@ const validateTitle = async ctx => {
   return ctx.wizard.next();
 };
 
-/*
-  Ask For Description
-  Validate user's response (only callback_queries are accepted)
-*/
 const confirmTitleAndAskForDescription = async ctx => {
   // If not callbackQuery, delete message if possible
   if (!ctx.callbackQuery) {
@@ -158,18 +123,14 @@ const confirmTitleAndAskForDescription = async ctx => {
     case CLOSE_WIZARD:
       return ctx.scene.leave();
     case NEXT_STEP:
-      await ctx.reply(
-        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci minimo 20 e  massimo 500 caratteri</i>',
-        { parse_mode: 'HTML' }
-      );
+      await ctx.reply('<b>Aggiungi una breve descrizione</b>\n<i>Inserisci minimo 20 e  massimo 500 caratteri</i>', {
+        parse_mode: 'HTML',
+      });
       return ctx.wizard.next();
     case PREVIOUS_STEP:
-      await ctx.reply(
-        '<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci massimo 50 caratteri</i>',
-        {
-          parse_mode: 'HTML',
-        }
-      );
+      await ctx.reply('<b>Quale prodotto vuoi vendere?</b>\n<i>Inserisci massimo 50 caratteri</i>', {
+        parse_mode: 'HTML',
+      });
       return ctx.wizard.back();
     default:
       await ctx.reply('Bzzagrakkchhabz, Bot is dead, You killed the bot');
@@ -177,12 +138,6 @@ const confirmTitleAndAskForDescription = async ctx => {
   }
 };
 
-/*
-  Validate description
-  Validate user's response (updates othen than text messages are deleted)
-  Update wizard's state with given description
-  Show description and prompt user for confirmation
-*/
 const validateDescription = async ctx => {
   // Check if user sent a message and not a callback_query, if it is a message check if it is a text and not a GIF/Sticker
   if (!ctx.message) {
@@ -225,15 +180,7 @@ const validateDescription = async ctx => {
   return ctx.wizard.next();
 };
 
-/*
-  Ask For Images
-  Validate user's response (only callback_queries are accepted)
-  Based on callback_query make decisions:
-    If user confirms, ask for images, wait for user's input and then go to next step
-    If user wants to edit description, re-show description prompt and repeat this step
-    If user wants to leave, exit current scene
-*/
-const confirmDescriptionAndAskForImages = async ctx => {
+const confirmDescriptionAndAskForConditions = async ctx => {
   if (!ctx.callbackQuery) {
     if (ctx.message) {
       const { message_id } = ctx.message;
@@ -248,24 +195,42 @@ const confirmDescriptionAndAskForImages = async ctx => {
     case CLOSE_WIZARD:
       return ctx.scene.leave();
     case NEXT_STEP:
-      await ctx.reply(
-        "<b>Invia una o piu foto del prodotto</b><em>\nQuando hai finito premi sul pulsante 'Avanti'</em>",
-        {
-          parse_mode: 'HTML',
-          reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
-        }
-      );
+      await ctx.reply('<b>Seleziona la condizione estetica/funzionale del prodotto</b>', {
+        parse_mode: 'HTML',
+        reply_markup: getConditionsMarkup(),
+      });
       return ctx.wizard.next();
     case PREVIOUS_STEP:
-      ctx.reply(
-        '<b>Aggiungi una breve descrizione</b>\n<i>Inserisci massimo 500 caratteri</i>',
-        { parse_mode: 'HTML' }
-      );
+      ctx.reply('<b>Aggiungi una breve descrizione</b>\n<i>Inserisci massimo 500 caratteri</i>', {
+        parse_mode: 'HTML',
+      });
       return ctx.wizard.back();
     default:
       await ctx.reply('Bzzagrakkchhabz, Bot is dead, You killed the bot');
       return ctx.scene.leave();
   }
+};
+
+const confirmConditionAndAskForImages = async ctx => {
+  if (!ctx.callbackQuery) {
+    if (ctx.message) {
+      const { message_id } = ctx.message;
+      // If user sends random message, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
+    }
+    return;
+  }
+  ctx.answerCbQuery();
+  const { data } = ctx.callbackQuery;
+  if (!Object.values(conditions).includes(data)) {
+    return;
+  }
+  ctx.wizard.state.condition = data;
+  await ctx.reply("<b>Invia una o piu foto del prodotto</b><em>\nQuando hai finito premi sul pulsante 'Avanti'</em>", {
+    parse_mode: 'HTML',
+    reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
+  });
+  return ctx.wizard.next();
 };
 
 /*
@@ -316,10 +281,7 @@ const validateImagesAndAskForPrice = async ctx => {
   }
 
   const { file_id } = ctx.message.photo[ctx.message.photo.length - 1]; // photo[max] is the max resolution image
-  ctx.wizard.state.images =
-    ctx.wizard.state.images === undefined
-      ? [file_id]
-      : [...ctx.wizard.state.images, file_id];
+  ctx.wizard.state.images = ctx.wizard.state.images === undefined ? [file_id] : [...ctx.wizard.state.images, file_id];
   return;
 };
 
@@ -330,10 +292,7 @@ const priceValidation = async ctx => {
   if (!ctx.message) {
     return;
   }
-  if (
-    !ctx.message.text ||
-    isNaN(parseFloat(ctx.message.text.replace(',', '.')))
-  ) {
+  if (!ctx.message.text || isNaN(parseFloat(ctx.message.text.replace(',', '.')))) {
     const { message_id } = ctx.message;
     // If user sends random message, delete it in order to avoid chat cluttering
     ctx.deleteMessage(message_id);
@@ -344,9 +303,7 @@ const priceValidation = async ctx => {
   // Convert string into a floating point number
   const receivedValue = parseFloat(text.replace(',', '.'));
   if (receivedValue > 10000) {
-    ctx.reply(
-      'Il prezzo non deve superare 10000€\n<b>Inserisci il prezzo richiesto</b>'
-    );
+    ctx.reply('Il prezzo non deve superare 10000€\n<b>Inserisci il prezzo richiesto</b>');
     return;
   }
   ctx.wizard.state.value = receivedValue;
@@ -380,18 +337,14 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
       return ctx.scene.leave();
     case NEXT_STEP:
       ctx.wizard.state.paymentMethods = [];
-      const paymentMethodsPrompt = getPaymentMethodsMenuMarkup(
-        ctx.wizard.state.paymentMethods
-      );
+      const paymentMethodsPrompt = getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods);
       ctx.reply('<b>Seleziona i metodi di pagamento</b>', {
         parse_mode: 'HTML',
         reply_markup: paymentMethodsPrompt,
       });
       return ctx.wizard.next();
     case PREVIOUS_STEP:
-      await ctx.reply(
-        'Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)'
-      );
+      await ctx.reply('Inserisci il prezzo richiesto (scrivi solo il valore numerico, senza €)');
       return ctx.wizard.back();
     default:
       await ctx.reply('Bzzagrakkchhabz', 'Bot is dead', 'You killed the bot');
@@ -418,14 +371,7 @@ const updatePaymentMethods = async ctx => {
         ctx.reply('Seleziona almeno un metodo di pagamento');
         return;
       }
-      const {
-        title,
-        description,
-        images,
-        value,
-        category,
-        paymentMethods,
-      } = ctx.wizard.state;
+      const { title, description, images, value, category, paymentMethods, condition } = ctx.wizard.state;
       const { username, id, first_name } = ctx.from;
 
       // generate array of inputMediaPhoto to be sent with sendMediaGroup
@@ -443,9 +389,7 @@ const updatePaymentMethods = async ctx => {
           constraint: '(id)',
         });
       } catch (error) {
-        ctx.reply(
-          'Qualcosa è andato storto, il bot potrebbe essere in manutenzione, riprova piu tardi'
-        );
+        ctx.reply('Qualcosa è andato storto, il bot potrebbe essere in manutenzione, riprova piu tardi');
         ctx.scene.leave();
         logger.error(error);
       }
@@ -456,16 +400,15 @@ const updatePaymentMethods = async ctx => {
         const result = await knex('insertions')
           .returning('id')
           .insert({
-            product: ctx.wizard.state.title,
+            product: title,
             user_id: id,
-            category: ctx.wizard.state.category,
+            category,
+            condition,
           });
         console.log(result);
         announceId = result[0];
       } catch (error) {
-        ctx.reply(
-          'Qualcosa è andato storto, il bot potrebbe essere in manutenzione, riprova piu tardi'
-        );
+        ctx.reply('Qualcosa è andato storto, il bot potrebbe essere in manutenzione, riprova piu tardi');
         ctx.scene.leave();
         console.log(error);
         logger.error('Cannot save sale announcement to the database');
@@ -496,44 +439,38 @@ const updatePaymentMethods = async ctx => {
         title,
         description,
         value,
-        paymentMethods
+        paymentMethods,
+        condition
       );
       try {
         ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
       } catch (error) {
-        ctx.reply(
-          'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
-        );
+        ctx.reply('Errore, impossibile inviare il tuo messaggio. Riprova piu tardi');
         return ctx.scene.leave();
       }
       // ctx.deleteMessage(ctx.callbackQuery.message.message_id);
-      await ctx.reply('<b>OPERAZIONE COMPLETATA</b>', { parse_mode: 'HTML' });
       await ctx.reply(
-        'Grazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato'
+        '<b>OPERAZIONE COMPLETATA</b>\nGrazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato',
+        { parse_mode: 'HTML' }
       );
+      console.log(ctx.wizard.state);
       return ctx.scene.leave();
     case PAYPAL:
       // If paypal is already present
       if (ctx.wizard.state.paymentMethods.includes('Paypal')) {
         // Remove it
-        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
-          method => {
-            return method !== 'Paypal';
-          }
-        );
+        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(method => {
+          return method !== 'Paypal';
+        });
         ctx.answerCbQuery('Paypal rimosso');
       } else {
         ctx.wizard.state.paymentMethods =
-          ctx.wizard.state.paymentMethods === undefined
-            ? ['Paypal']
-            : [...ctx.wizard.state.paymentMethods, 'Paypal'];
+          ctx.wizard.state.paymentMethods === undefined ? ['Paypal'] : [...ctx.wizard.state.paymentMethods, 'Paypal'];
         ctx.answerCbQuery('Paypal aggiunto');
       }
       // Update message with dynamically generated inline keyboard of payment methods
       try {
-        await ctx.editMessageReplyMarkup(
-          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
-        );
+        await ctx.editMessageReplyMarkup(getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods));
         return;
       } catch (error) {
         logger.error(error);
@@ -545,23 +482,17 @@ const updatePaymentMethods = async ctx => {
       // If hype is already present
       if (ctx.wizard.state.paymentMethods.includes('Hype')) {
         // Remove it
-        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
-          method => {
-            return method !== 'Hype';
-          }
-        );
+        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(method => {
+          return method !== 'Hype';
+        });
         ctx.answerCbQuery('Hype rimosso');
       } else {
         ctx.wizard.state.paymentMethods =
-          ctx.wizard.state.paymentMethods === undefined
-            ? ['Hype']
-            : [...ctx.wizard.state.paymentMethods, 'Hype'];
+          ctx.wizard.state.paymentMethods === undefined ? ['Hype'] : [...ctx.wizard.state.paymentMethods, 'Hype'];
         ctx.answerCbQuery('Hype aggiunto');
       }
       try {
-        await ctx.editMessageReplyMarkup(
-          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
-        );
+        await ctx.editMessageReplyMarkup(getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods));
         return;
       } catch (error) {
         logger.error(error);
@@ -573,11 +504,9 @@ const updatePaymentMethods = async ctx => {
       // If cash is already present
       if (ctx.wizard.state.paymentMethods.includes('Contante')) {
         // Remove it
-        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
-          method => {
-            return method !== 'Contante';
-          }
-        );
+        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(method => {
+          return method !== 'Contante';
+        });
         ctx.answerCbQuery('Contante rimosso');
       } else {
         ctx.wizard.state.paymentMethods =
@@ -587,9 +516,7 @@ const updatePaymentMethods = async ctx => {
         ctx.answerCbQuery('Contante aggiunto');
       }
       try {
-        await ctx.editMessageReplyMarkup(
-          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
-        );
+        await ctx.editMessageReplyMarkup(getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods));
         return;
       } catch (error) {
         logger.error(error);
@@ -601,11 +528,9 @@ const updatePaymentMethods = async ctx => {
       // If transfer is already present
       if (ctx.wizard.state.paymentMethods.includes('Bonifico')) {
         // Remove it
-        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(
-          method => {
-            return method !== 'Bonifico';
-          }
-        );
+        ctx.wizard.state.paymentMethods = ctx.wizard.state.paymentMethods.filter(method => {
+          return method !== 'Bonifico';
+        });
         ctx.answerCbQuery('Bonifico Rimosso');
       } else {
         ctx.wizard.state.paymentMethods =
@@ -616,9 +541,7 @@ const updatePaymentMethods = async ctx => {
         ctx.answerCbQuery('Bonifico aggiunto');
       }
       try {
-        await ctx.editMessageReplyMarkup(
-          getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods)
-        );
+        await ctx.editMessageReplyMarkup(getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods));
         return;
       } catch (error) {
         logger.error(error);
@@ -633,13 +556,29 @@ const updatePaymentMethods = async ctx => {
   }
 };
 
+// Helpers
+const getConditionsMarkup = () => {
+  return Markup.inlineKeyboard([
+    [
+      Markup.callbackButton(conditions.LIKE_NEW, conditions.LIKE_NEW),
+      Markup.callbackButton(conditions.VERY_GOOD, conditions.VERY_GOOD),
+    ],
+    [
+      Markup.callbackButton(conditions.GOOD, conditions.GOOD),
+      Markup.callbackButton(conditions.ACCEPTABLE, conditions.ACCEPTABLE),
+    ],
+    [Markup.callbackButton(conditions.BROKEN, conditions.BROKEN)],
+  ]).resize();
+};
+
 module.exports = {
   askForCategory,
   confirmCategoryAndAskForTitle,
   validateTitle,
   confirmTitleAndAskForDescription,
   validateDescription,
-  confirmDescriptionAndAskForImages,
+  confirmDescriptionAndAskForConditions,
+  confirmConditionAndAskForImages,
   validateImagesAndAskForPrice,
   priceValidation,
   priceConfirmationAndShowPaymentsKeyboard,
