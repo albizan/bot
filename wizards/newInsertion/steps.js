@@ -405,7 +405,6 @@ const updatePaymentMethods = async ctx => {
             category,
             condition,
           });
-        console.log(result);
         announceId = result[0];
       } catch (error) {
         ctx.reply('Qualcosa è andato storto, il bot potrebbe essere in manutenzione, riprova piu tardi');
@@ -413,8 +412,6 @@ const updatePaymentMethods = async ctx => {
         console.log(error);
         logger.error('Cannot save sale announcement to the database');
       }
-
-      console.log(announceId);
 
       // Save insertion's images
       ctx.wizard.state.images.forEach(file_id => {
@@ -453,7 +450,6 @@ const updatePaymentMethods = async ctx => {
         '<b>OPERAZIONE COMPLETATA</b>\nGrazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato',
         { parse_mode: 'HTML' }
       );
-      console.log(ctx.wizard.state);
       return ctx.scene.leave();
     case PAYPAL:
       // If paypal is already present
