@@ -8,4 +8,5 @@ module.exports = {
   back: '\u{25C0}',
   forward: '\u{25B6}',
   sos: '\u{1F198}',
+  conditions: '\u{1F527}',
 };
