@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cron": "^1.8.2",
     "dotenv": "^8.2.0",
     "knex": "^0.20.10",
     "pg": "^7.18.1",
