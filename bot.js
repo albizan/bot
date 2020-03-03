@@ -1,4 +1,5 @@
 const Telegraf = require('telegraf');
+var CronJob = require('cron').CronJob;
 
 // Import command setups
 const setupCommands = require('./commands');
@@ -14,6 +15,16 @@ setupMiddleware(bot);
 
 // Setup Commands
 setupCommands(bot);
+
+// Cron Job
+const sendMessageToGroupJob = new CronJob('0 0 */6 * * *', function() {
+  try {
+    bot.telegram.sendMessage(process.env.MIT_GROUP, 'Test cronjob');
+  } catch (error) {
+    console.log(error);
+  }
+});
+sendMessageToGroupJob.start();
 
 /*bot.command('reply', async ctx => {
   const { id } = ctx.from;
