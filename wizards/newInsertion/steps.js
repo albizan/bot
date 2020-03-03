@@ -555,14 +555,10 @@ const updatePaymentMethods = async ctx => {
 // Helpers
 const getConditionsMarkup = () => {
   return Markup.inlineKeyboard([
-    [
-      Markup.callbackButton(conditions.LIKE_NEW, conditions.LIKE_NEW),
-      Markup.callbackButton(conditions.VERY_GOOD, conditions.VERY_GOOD),
-    ],
-    [
-      Markup.callbackButton(conditions.GOOD, conditions.GOOD),
-      Markup.callbackButton(conditions.ACCEPTABLE, conditions.ACCEPTABLE),
-    ],
+    [Markup.callbackButton(conditions.LIKE_NEW, conditions.LIKE_NEW)],
+    [Markup.callbackButton(conditions.VERY_GOOD, conditions.VERY_GOOD)],
+    [Markup.callbackButton(conditions.GOOD, conditions.GOOD)],
+    [Markup.callbackButton(conditions.ACCEPTABLE, conditions.ACCEPTABLE)],
     [Markup.callbackButton(conditions.BROKEN, conditions.BROKEN)],
   ]).resize();
 };
