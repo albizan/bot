@@ -7,8 +7,8 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex, Promise) {
-  return knex.schema.table('products', function(table) {
+exports.down = function(knex) {
+  return knex.schema.table('insertions', function(table) {
     table.dropColumn('condition');
   });
 };

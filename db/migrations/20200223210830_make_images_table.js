@@ -9,7 +9,8 @@ exports.up = function(knex) {
     table
       .foreign('insertion_id')
       .references('id')
-      .inTable('insertions');
+      .inTable('insertions')
+      .onDelete('CASCADE');
   });
 };
 
