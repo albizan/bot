@@ -9,4 +9,5 @@ module.exports = {
   forward: '\u{25B6}',
   sos: '\u{1F198}',
   conditions: '\u{1F527}',
+  pushPin: '\u{1F4CC}',
 };

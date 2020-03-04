@@ -211,7 +211,7 @@ const confirmDescriptionAndAskForConditions = async ctx => {
   }
 };
 
-const confirmConditionAndAskForImages = async ctx => {
+const confirmConditionAndAskForLocation = async ctx => {
   if (!ctx.callbackQuery) {
     if (ctx.message) {
       const { message_id } = ctx.message;
@@ -226,10 +226,80 @@ const confirmConditionAndAskForImages = async ctx => {
     return;
   }
   ctx.wizard.state.condition = data;
-  await ctx.reply("<b>Invia una o piu foto del prodotto</b><em>\nQuando hai finito premi sul pulsante 'Avanti'</em>", {
+  await ctx.reply('<b>Inserisci la località di vendita</b>\nPer favore digita massimo 40 caratteri', {
     parse_mode: 'HTML',
-    reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
   });
+  return ctx.wizard.next();
+};
+
+const validateLocation = async ctx => {
+  // Check if user sent a message and not a callback_query, if it is a message check if it is a text and not a GIF/Sticker
+  if (!ctx.message) {
+    return;
+  }
+  if (!ctx.message.text) {
+    const { message_id } = ctx.message;
+    // If user sends random non-text message, delete it in order to avoid chat cluttering
+    ctx.deleteMessage(message_id);
+    return;
+  }
+  // If I get here, text is defined
+  const { text, message_id } = ctx.message;
+  // Check if text is a bot command, commands are not accepted
+  if (text.startsWith('/')) {
+    ctx.deleteMessage(message_id);
+    return;
+  }
+
+  if (text.length > 40) {
+    ctx.reply('Il testo inserito è troppo lungo');
+    ctx.deleteMessage(message_id);
+    return;
+  }
+
+  // Update wizard state with given validated description
+  ctx.wizard.state.location = text;
+
+  // Ask for confirmation
+  await ctx.reply(`<b>Località:</b> ${text}`, {
+    reply_markup: sellItemMenuMarkup,
+    parse_mode: 'HTML',
+  });
+  return ctx.wizard.next();
+};
+
+const confirmLocationAndAskForImages = async ctx => {
+  if (!ctx.callbackQuery) {
+    if (ctx.message) {
+      const { message_id } = ctx.message;
+      // If user sends random message, delete it in order to avoid chat cluttering
+      ctx.deleteMessage(message_id);
+    }
+    return;
+  }
+  ctx.answerCbQuery();
+  const { data } = ctx.callbackQuery;
+  switch (data) {
+    case CLOSE_WIZARD:
+      return ctx.scene.leave();
+    case NEXT_STEP:
+      await ctx.reply(
+        "<b>Invia una o piu foto del prodotto</b><em>\nQuando hai finito premi sul pulsante 'Avanti'</em>",
+        {
+          parse_mode: 'HTML',
+          reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
+        }
+      );
+      return ctx.wizard.next();
+    case PREVIOUS_STEP:
+      await ctx.reply('<b>Inserisci la località di vendita</b>\nPer favore digita massimo 40 caratteri', {
+        parse_mode: 'HTML',
+      });
+      return ctx.wizard.back();
+    default:
+      await ctx.reply('Bzzagrakkchhabz, Bot is dead, You killed the bot');
+      return ctx.scene.leave();
+  }
   return ctx.wizard.next();
 };
 
@@ -371,7 +441,7 @@ const updatePaymentMethods = async ctx => {
         ctx.reply('Seleziona almeno un metodo di pagamento');
         return;
       }
-      const { title, description, images, value, category, paymentMethods, condition } = ctx.wizard.state;
+      const { title, description, images, value, category, paymentMethods, condition, location } = ctx.wizard.state;
       const { username, id, first_name } = ctx.from;
 
       // generate array of inputMediaPhoto to be sent with sendMediaGroup
@@ -437,7 +507,8 @@ const updatePaymentMethods = async ctx => {
         description,
         value,
         paymentMethods,
-        condition
+        condition,
+        location
       );
       try {
         ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
@@ -570,7 +641,9 @@ module.exports = {
   confirmTitleAndAskForDescription,
   validateDescription,
   confirmDescriptionAndAskForConditions,
-  confirmConditionAndAskForImages,
+  confirmConditionAndAskForLocation,
+  validateLocation,
+  confirmLocationAndAskForImages,
   validateImagesAndAskForPrice,
   priceValidation,
   priceConfirmationAndShowPaymentsKeyboard,

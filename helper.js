@@ -3,7 +3,7 @@ const Markup = require('telegraf/markup');
 // Import Database
 const knex = require('./db');
 
-const { package, memo, moneyBag, moneyFly, silhouette, checkMark, conditions } = require('./emoji');
+const { package, memo, moneyBag, moneyFly, silhouette, checkMark, conditions, pushPin } = require('./emoji');
 // Import callback query types
 const {
   NEW_INSERTION,
@@ -31,15 +31,25 @@ const {
   OTHER,
 } = require('./types/callbacks.types');
 
-const generateCaption = (insertionId, category, username, title, description, value, paymentMethods, condition) => {
+const generateCaption = (
+  insertionId,
+  category,
+  username,
+  title,
+  description,
+  value,
+  paymentMethods,
+  condition,
+  location
+) => {
   return `\n${package} Prodotto ${package}\n${title}
     \n${conditions} Condizione ${conditions}\n${condition}
     \n${memo} Descrizione ${memo}\n${description}
-    \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€ (SS Escluse)
+    \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€
+    \n${pushPin} Località ${pushPin}\n${location}
     \n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(', ')}
-    \n${silhouette} Contatto ${silhouette}
-    \nUsername: @${username}
-    \nCategoria: #${category}
+    \n${silhouette} Contatto ${silhouette}\n@${username}
+    \n\nCategoria: #${category}
     \n#av${insertionId}`;
 };
 
