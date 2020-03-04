@@ -18,7 +18,8 @@ setupMiddleware(bot);
 setupCommands(bot);
 
 // Cron Job
-const sendMessageToGroupJob = new CronJob('* * */6 * *', function() {
+const sendMessageToGroupJob = new CronJob('* * */6 * * *', function() {
+  console.log('Sending message...');
   try {
     bot.telegram.sendMessage(
       process.env.MIT_GROUP,
