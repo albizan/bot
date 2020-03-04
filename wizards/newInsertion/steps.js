@@ -284,7 +284,7 @@ const confirmLocationAndAskForImages = async ctx => {
       return ctx.scene.leave();
     case NEXT_STEP:
       await ctx.reply(
-        "<b>Invia una o piu foto del prodotto</b><em>\nQuando hai finito premi sul pulsante 'Avanti'</em>",
+        "<b>Invia una o piu foto del prodotto\nPuoi utilizzare esclusivamente immagini reali da te scattate che mostrino chiaramente il tuo tag telegram.\nGli annunci che non soddifano questi requisiti saranno scartati</b>\n<em>Quando hai finito premi sul pulsante 'Avanti'</em>",
         {
           parse_mode: 'HTML',
           reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
@@ -300,7 +300,6 @@ const confirmLocationAndAskForImages = async ctx => {
       await ctx.reply('Bzzagrakkchhabz, Bot is dead, You killed the bot');
       return ctx.scene.leave();
   }
-  return ctx.wizard.next();
 };
 
 /*
@@ -384,15 +383,7 @@ const priceValidation = async ctx => {
   return ctx.wizard.next();
 };
 
-/* 
-  Step 8 of Wizard - Price Confirmation and Show Payment Methods Keyboard
-  Validate user's response (only text callback_queries are accepted)
-  Based on callback_query make decisions:
-    If user confirms, ask for description, wait for user's input and then go to next step
-    If user wants to edit title, show prompt and repeat this step
-    If user wants to leave, exit current scene
-*/
-const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
+const priceConfirmationAndSelectShippingCosts = async ctx => {
   if (!ctx.callbackQuery) {
     const { message_id } = ctx.message;
     // If user sends random message, delete it in order to avoid chat cluttering
@@ -406,11 +397,12 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
     case CLOSE_WIZARD:
       return ctx.scene.leave();
     case NEXT_STEP:
-      ctx.wizard.state.paymentMethods = [];
-      const paymentMethodsPrompt = getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods);
-      ctx.reply('<b>Seleziona i metodi di pagamento</b>', {
+      ctx.reply('<b>Le spese di spedizione sono...</b>', {
         parse_mode: 'HTML',
-        reply_markup: paymentMethodsPrompt,
+        reply_markup: Markup.inlineKeyboard([
+          [Markup.callbackButton('Incluse', 'incluse')],
+          [Markup.callbackButton('Escluse', 'escluse')],
+        ]),
       });
       return ctx.wizard.next();
     case PREVIOUS_STEP:
@@ -420,6 +412,26 @@ const priceConfirmationAndShowPaymentsKeyboard = async ctx => {
       await ctx.reply('Bzzagrakkchhabz', 'Bot is dead', 'You killed the bot');
       return ctx.scene.leave();
   }
+};
+
+const shippingCostsConfirmationAndShowPaymentsKeyboard = async ctx => {
+  if (!ctx.callbackQuery) {
+    const { message_id } = ctx.message;
+    // If user sends random message, delete it in order to avoid chat cluttering
+    ctx.deleteMessage(message_id);
+    return;
+  }
+  ctx.answerCbQuery();
+  // ctx.deleteMessage(ctx.callbackQuery.message.message_id);
+  const { data } = ctx.callbackQuery;
+  ctx.wizard.state.shippingCosts = data;
+  ctx.wizard.state.paymentMethods = [];
+  const paymentMethodsPrompt = getPaymentMethodsMenuMarkup(ctx.wizard.state.paymentMethods);
+  ctx.reply('<b>Seleziona i metodi di pagamento</b>', {
+    parse_mode: 'HTML',
+    reply_markup: paymentMethodsPrompt,
+  });
+  ctx.wizard.next();
 };
 
 /* Listen for callbackqueries, update payment methods and send message when a certain button is clicked */
@@ -441,7 +453,17 @@ const updatePaymentMethods = async ctx => {
         ctx.reply('Seleziona almeno un metodo di pagamento');
         return;
       }
-      const { title, description, images, value, category, paymentMethods, condition, location } = ctx.wizard.state;
+      const {
+        title,
+        description,
+        images,
+        value,
+        category,
+        paymentMethods,
+        condition,
+        location,
+        shippingCosts,
+      } = ctx.wizard.state;
       const { username, id, first_name } = ctx.from;
 
       // generate array of inputMediaPhoto to be sent with sendMediaGroup
@@ -508,7 +530,8 @@ const updatePaymentMethods = async ctx => {
         value,
         paymentMethods,
         condition,
-        location
+        location,
+        shippingCosts
       );
       try {
         ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
@@ -521,9 +544,6 @@ const updatePaymentMethods = async ctx => {
         '<b>OPERAZIONE COMPLETATA</b>\n\nGrazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio.',
         { parse_mode: 'HTML' }
       );
-      await ctx.reply('Per tornare alla home...', {
-        reply_markup: Markup.inlineKeyboard([Markup.callbackButton('... premi qua', 'Home')]),
-      });
       return ctx.scene.leave();
     case PAYPAL:
       // If paypal is already present
@@ -566,7 +586,7 @@ const updatePaymentMethods = async ctx => {
         return;
       } catch (error) {
         logger.error(error);
-        ctx.reply('Si è verificato un errore, ctxiprova piu tardi');
+        ctx.reply('Si è verificato un errore, riprova piu tardi');
         ctx.scene.leave();
       }
       return;
@@ -590,7 +610,7 @@ const updatePaymentMethods = async ctx => {
         return;
       } catch (error) {
         logger.error(error);
-        ctx.reply('Si è verificato un errore, ctxiprova piu tardi');
+        ctx.reply('Si è verificato un errore, riprova piu tardi');
         ctx.scene.leave();
       }
       return;
@@ -649,6 +669,7 @@ module.exports = {
   confirmLocationAndAskForImages,
   validateImagesAndAskForPrice,
   priceValidation,
-  priceConfirmationAndShowPaymentsKeyboard,
+  priceConfirmationAndSelectShippingCosts,
+  shippingCostsConfirmationAndShowPaymentsKeyboard,
   updatePaymentMethods,
 };

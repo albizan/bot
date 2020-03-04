@@ -40,12 +40,13 @@ const generateCaption = (
   value,
   paymentMethods,
   condition,
-  location
+  location,
+  shippingCosts
 ) => {
   return `\n${package} Prodotto ${package}\n${title}
     \n${conditions} Condizione ${conditions}\n${condition}
     \n${memo} Descrizione ${memo}\n${description}
-    \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€
+    \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€ (Spese di spedizione ${shippingCosts})
     \n${pushPin} Località ${pushPin}\n${location}
     \n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(', ')}
     \n${silhouette} Contatto ${silhouette}\n@${username}

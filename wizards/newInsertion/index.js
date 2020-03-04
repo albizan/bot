@@ -13,7 +13,8 @@ const {
   confirmLocationAndAskForImages,
   validateImagesAndAskForPrice,
   priceValidation,
-  priceConfirmationAndShowPaymentsKeyboard,
+  priceConfirmationAndSelectShippingCosts,
+  shippingCostsConfirmationAndShowPaymentsKeyboard,
   updatePaymentMethods,
 } = require('./steps');
 
@@ -35,11 +36,16 @@ const newInsertionWizard = new WizardScene(
   confirmLocationAndAskForImages,
   validateImagesAndAskForPrice,
   priceValidation,
-  priceConfirmationAndShowPaymentsKeyboard,
+  priceConfirmationAndSelectShippingCosts,
+  shippingCostsConfirmationAndShowPaymentsKeyboard,
   updatePaymentMethods
 );
 
 newInsertionWizard.command(['home', 'quit', 'start'], ctx => {
+  return ctx.scene.leave();
+});
+
+newInsertionWizard.leave(ctx => {
   const { id, first_name } = ctx.from;
   try {
     ctx.telegram.sendMessage(id, getWelcomeMessage(first_name), {
@@ -50,7 +56,6 @@ newInsertionWizard.command(['home', 'quit', 'start'], ctx => {
     logger.error(error);
     return;
   }
-  return ctx.scene.leave();
 });
 
 newInsertionWizard.leave();
