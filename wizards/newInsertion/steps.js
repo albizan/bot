@@ -226,9 +226,12 @@ const confirmConditionAndAskForLocation = async ctx => {
     return;
   }
   ctx.wizard.state.condition = data;
-  await ctx.reply('<b>Inserisci la località di vendita</b>\nPer favore digita massimo 40 caratteri', {
-    parse_mode: 'HTML',
-  });
+  await ctx.reply(
+    '<b>Inserisci Località e Provincia di vendita</b> nel formato:\n<em>Località (Provincia)</em>\nEsempio: Rho (Milano)\nDigita massimo 40 caratteri',
+    {
+      parse_mode: 'HTML',
+    }
+  );
   return ctx.wizard.next();
 };
 
@@ -402,6 +405,7 @@ const priceConfirmationAndSelectShippingCosts = async ctx => {
         reply_markup: Markup.inlineKeyboard([
           [Markup.callbackButton('Incluse', 'incluse')],
           [Markup.callbackButton('Escluse', 'escluse')],
+          [Markup.callbackButton('Consegna a mano', 'Consegna a mano')],
         ]),
       });
       return ctx.wizard.next();

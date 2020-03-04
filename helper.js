@@ -43,10 +43,16 @@ const generateCaption = (
   location,
   shippingCosts
 ) => {
+  const ss = shippingCosts => {
+    if (shippingCosts === 'Consegna a mano') {
+      return `(${shippingCosts})`;
+    }
+    return `(Spese di spedizione ${shippingCosts})`;
+  };
   return `\n${package} Prodotto ${package}\n${title}
     \n${conditions} Condizione ${conditions}\n${condition}
     \n${memo} Descrizione ${memo}\n${description}
-    \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€ (Spese di spedizione ${shippingCosts})
+    \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€ ${ss(shippingCosts)}
     \n${pushPin} Località ${pushPin}\n${location}
     \n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(', ')}
     \n${silhouette} Contatto ${silhouette}\n@${username}
