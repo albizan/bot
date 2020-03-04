@@ -372,7 +372,7 @@ const priceValidation = async ctx => {
   // Convert string into a floating point number
   const receivedValue = parseFloat(text.replace(',', '.'));
   if (receivedValue > 10000) {
-    ctx.reply('Il prezzo non deve superare 10000€\n<b>Inserisci il prezzo richiesto</b>');
+    ctx.reply('Il prezzo non deve superare 10000€\nReinserisci il prezzo richiesto');
     return;
   }
   ctx.wizard.state.value = receivedValue;
