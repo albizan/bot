@@ -25,10 +25,7 @@ const sendMessageToGroupJob = new CronJob('* * */6 * *', function() {
       'Per tutte le discussioni non strettamente inerenti al mercatino e agli annunci ivi proposti, vi invitiamo ad entrare nel gruppo @pcbuildingitaly. Vi ricordiamo inoltre che è disponibile il nostro bot @mitricvenbot per creare annunci di vendita e per consultare le inserzioni già approvate suddivise per categoria. Tutti gli annunci possono essere consultati sul nostro canale @mitvendita',
       {
         reply_markup: Markup.inlineKeyboard([
-          [
-            Markup.urlButton(`Canale`, 'https://t.me/mitvendita'),
-            Markup.callbackButton('BOT', 'https://t.me/mitricvenbot'),
-          ],
+          [Markup.urlButton(`Canale`, 'https://t.me/mitvendita'), Markup.urlButton('BOT', 'https://t.me/mitricvenbot')],
         ]).resize(),
       }
     );
