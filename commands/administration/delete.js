@@ -2,6 +2,9 @@ const knex = require('../../db');
 
 function setupDeleteCommand(bot) {
   bot.command('delete', async ctx => {
+    if (!process.env.ADMINS.includes(id)) {
+      return;
+    }
     const [insertionTag] = ctx.state.command.args;
     if (!insertionTag) {
       return;
@@ -11,13 +14,14 @@ function setupDeleteCommand(bot) {
     console.log(insertionTag);
     switch (insertionType) {
       case 'av':
-        console.log(`Insertion #${insertionId} to be deleted`);
         try {
           await knex('insertions')
             .where({ id: insertionId })
             .del();
+          ctx.reply(`Annuncio n° ${insertionId} eliminato`);
         } catch (error) {
           console.log(error);
+          ctx.reply(error.message);
         }
         break;
       case 'ar':
