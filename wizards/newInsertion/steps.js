@@ -518,9 +518,12 @@ const updatePaymentMethods = async ctx => {
       }
       // ctx.deleteMessage(ctx.callbackQuery.message.message_id);
       await ctx.reply(
-        '<b>OPERAZIONE COMPLETATA</b>\nGrazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio. In caso di problemi verrai ricontattato',
+        '<b>OPERAZIONE COMPLETATA</b>\n\nGrazie, il tuo messaggio è stato inviato agli amministratori che provvederanno alla convalida del tuo annuncio.',
         { parse_mode: 'HTML' }
       );
+      await ctx.reply('Per tornare alla home...', {
+        reply_markup: Markup.inlineKeyboard([Markup.callbackButton('... premi qua', 'Home')]),
+      });
       return ctx.scene.leave();
     case PAYPAL:
       // If paypal is already present

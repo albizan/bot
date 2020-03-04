@@ -40,10 +40,6 @@ const newInsertionWizard = new WizardScene(
 );
 
 newInsertionWizard.command(['home', 'quit', 'start'], ctx => {
-  return ctx.scene.leave();
-});
-
-newInsertionWizard.leave(ctx => {
   const { id, first_name } = ctx.from;
   try {
     ctx.telegram.sendMessage(id, getWelcomeMessage(first_name), {
@@ -54,5 +50,8 @@ newInsertionWizard.leave(ctx => {
     logger.error(error);
     return;
   }
+  return ctx.scene.leave();
 });
+
+newInsertionWizard.leave();
 module.exports = newInsertionWizard;
