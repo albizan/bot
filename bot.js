@@ -1,4 +1,5 @@
 const Telegraf = require('telegraf');
+const Markup = require('telegraf/markup');
 var CronJob = require('cron').CronJob;
 
 // Import command setups
@@ -17,7 +18,7 @@ setupMiddleware(bot);
 setupCommands(bot);
 
 // Cron Job
-const sendMessageToGroupJob = new CronJob('0 0 */6 * * *', function() {
+const sendMessageToGroupJob = new CronJob('* * */6 * *', function() {
   try {
     bot.telegram.sendMessage(
       process.env.MIT_GROUP,
