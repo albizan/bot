@@ -1,12 +1,11 @@
 const Telegraf = require('telegraf');
-const Markup = require('telegraf/markup');
-var CronJob = require('cron').CronJob;
-
-// Import command setups
-const setupCommands = require('./commands');
+const cronJob = require('./cron/sendMessage');
 
 // Import middleware setups
 const setupMiddleware = require('./middleware');
+
+// Import command setups
+const setupCommands = require('./commands');
 
 // Create BOT instance
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -17,24 +16,9 @@ setupMiddleware(bot);
 // Setup Commands
 setupCommands(bot);
 
-// Cron Job
-const sendMessageToGroupJob = new CronJob('0 0 */6 * * *', function() {
-  console.log('Sending message...');
-  try {
-    bot.telegram.sendMessage(
-      process.env.MIT_GROUP,
-      'Per tutte le discussioni non strettamente inerenti al mercatino e agli annunci ivi proposti, vi invitiamo ad entrare nel gruppo @pcbuildingitaly. Vi ricordiamo inoltre che è disponibile il nostro bot @mitricvenbot per creare annunci di vendita e per consultare le inserzioni già approvate suddivise per categoria. Tutti gli annunci possono essere consultati sul nostro canale @mitvendita',
-      {
-        reply_markup: Markup.inlineKeyboard([
-          [Markup.urlButton(`Canale`, 'https://t.me/mitvendita'), Markup.urlButton('BOT', 'https://t.me/mitricvenbot')],
-        ]).resize(),
-      }
-    );
-  } catch (error) {
-    console.log(error);
-  }
-});
-sendMessageToGroupJob.start();
+// Run Cron Job
+const job = cronJob(bot);
+job.start();
 
 /*bot.command('reply', async ctx => {
   const { id } = ctx.from;
