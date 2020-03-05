@@ -3,7 +3,7 @@ const knex = require('../../db');
 const logger = require('../../logger');
 const {
   sellItemMenuMarkup,
-  categoryMenuMarkup,
+  getSelectCategoryMarkup,
   getPaymentMethodsMenuMarkup,
   generateCaption,
   upsert,
@@ -15,20 +15,8 @@ const {
   NEXT_STEP,
   PREVIOUS_STEP,
   CLOSE_WIZARD,
-  PAYPAL,
-  HYPE,
-  CASH,
-  TRANSFER,
-  CPU,
-  GPU,
-  RAM,
-  MOBO,
-  PSU,
-  STORAGE,
-  CASE,
-  PERIPHERALS,
-  COMPLETE_PC,
-  OTHER,
+  payments,
+  categories,
   conditions,
 } = require('../../types/callbacks.types');
 
@@ -36,7 +24,7 @@ const askForCategory = ctx => {
   ctx.wizard.state = {};
   ctx.reply('<b>Seleziona una categoria</b>', {
     parse_mode: 'HTML',
-    reply_markup: categoryMenuMarkup,
+    reply_markup: getSelectCategoryMarkup(),
   });
   return ctx.wizard.next();
 };
@@ -56,7 +44,7 @@ const confirmCategoryAndAskForTitle = ctx => {
     return ctx.scene.leave();
   }
 
-  if (![CPU, GPU, RAM, MOBO, PSU, STORAGE, CASE, PERIPHERALS, COMPLETE_PC, OTHER].includes(data)) {
+  if (!Object.values(categories).includes(data)) {
     return;
   }
   ctx.wizard.state.category = data;
@@ -549,7 +537,7 @@ const updatePaymentMethods = async ctx => {
         { parse_mode: 'HTML' }
       );
       return ctx.scene.leave();
-    case PAYPAL:
+    case payments.PAYPAL:
       // If paypal is already present
       if (ctx.wizard.state.paymentMethods.includes('Paypal')) {
         // Remove it
@@ -572,7 +560,7 @@ const updatePaymentMethods = async ctx => {
         ctx.scene.leave();
       }
       return;
-    case HYPE:
+    case payments.HYPE:
       // If hype is already present
       if (ctx.wizard.state.paymentMethods.includes('Hype')) {
         // Remove it
@@ -594,7 +582,7 @@ const updatePaymentMethods = async ctx => {
         ctx.scene.leave();
       }
       return;
-    case CASH:
+    case payments.CASH:
       // If cash is already present
       if (ctx.wizard.state.paymentMethods.includes('Contante')) {
         // Remove it
@@ -618,7 +606,7 @@ const updatePaymentMethods = async ctx => {
         ctx.scene.leave();
       }
       return;
-    case TRANSFER:
+    case payments.TRANSFER:
       // If transfer is already present
       if (ctx.wizard.state.paymentMethods.includes('Bonifico')) {
         // Remove it

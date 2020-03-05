@@ -1,5 +1,7 @@
 const { Markup } = require('telegraf');
 
+const { getSelectCategoryMarkup } = require('../../helper');
+
 // Import Database
 const knex = require('../../db');
 
@@ -21,7 +23,6 @@ const showInsertions = async ctx => {
     return;
   }
   ctx.answerCbQuery();
-  ctx.deleteMessage(ctx.callbackQuery.message.message_id);
   const { data } = ctx.callbackQuery;
   if (!Object.values(categories).includes(data)) {
     return;
@@ -52,24 +53,6 @@ const showInsertions = async ctx => {
     );
   }
   return ctx.wizard.next();
-};
-
-// Helpers
-const getSelectCategoryMarkup = () => {
-  return Markup.inlineKeyboard([
-    [Markup.callbackButton(categories.CPU, categories.CPU), Markup.callbackButton(categories.GPU, categories.GPU)],
-    [Markup.callbackButton(categories.RAM, categories.RAM), Markup.callbackButton(categories.MOBO, categories.MOBO)],
-    [
-      Markup.callbackButton(categories.PSU, categories.PSU),
-      Markup.callbackButton(categories.STORAGE, categories.STORAGE),
-    ],
-    [
-      Markup.callbackButton(categories.CASE, categories.CASE),
-      Markup.callbackButton(categories.PERIPHERALS, categories.PERIPHERALS),
-    ],
-    [Markup.callbackButton(categories.COMPLETE_PC, categories.COMPLETE_PC)],
-    [Markup.callbackButton(categories.OTHER, categories.OTHER)],
-  ]).resize();
 };
 
 const getGoHomeMarkup = () => {

@@ -8,27 +8,12 @@ const { package, memo, moneyBag, moneyFly, silhouette, checkMark, conditions, pu
 const {
   NEW_INSERTION,
   BOT_INFO,
-  SEEK_ITEM,
-  SUPPORT_CHAT,
   SEARCH_INSERTION_BY_CATEGORY,
-  HOME,
   NEXT_STEP,
   PREVIOUS_STEP,
   CLOSE_WIZARD,
-  PAYPAL,
-  HYPE,
-  CASH,
-  TRANSFER,
-  CPU,
-  GPU,
-  RAM,
-  MOBO,
-  PSU,
-  STORAGE,
-  CASE,
-  PERIPHERALS,
-  COMPLETE_PC,
-  OTHER,
+  payments,
+  categories,
 } = require('./types/callbacks.types');
 
 const generateCaption = (
@@ -85,25 +70,33 @@ const getPaymentMethodsMenuMarkup = paymentMethods => {
 const generatePaymentsInlineKeyboard = paymentMethods => {
   return [
     [
-      Markup.callbackButton(`${paymentMethods.includes('Paypal') ? checkMark : ''} Paypal`, PAYPAL),
-      Markup.callbackButton(`${paymentMethods.includes('Hype') ? checkMark : ''} Hype`, HYPE),
+      Markup.callbackButton(`${paymentMethods.includes('Paypal') ? checkMark : ''} Paypal`, payments.PAYPAL),
+      Markup.callbackButton(`${paymentMethods.includes('Hype') ? checkMark : ''} Hype`, payments.HYPE),
     ],
     [
-      Markup.callbackButton(`${paymentMethods.includes('Contante') ? checkMark : ''} Contante`, CASH),
-      Markup.callbackButton(`${paymentMethods.includes('Bonifico') ? checkMark : ''} Bonifico`, TRANSFER),
+      Markup.callbackButton(`${paymentMethods.includes('Contante') ? checkMark : ''} Contante`, payments.CASH),
+      Markup.callbackButton(`${paymentMethods.includes('Bonifico') ? checkMark : ''} Bonifico`, payments.TRANSFER),
     ],
     [Markup.callbackButton('Annulla', CLOSE_WIZARD), Markup.callbackButton('Avanti', NEXT_STEP)],
   ];
 };
 
-const categoryMenuMarkup = Markup.inlineKeyboard([
-  [Markup.callbackButton(CPU, CPU), Markup.callbackButton(GPU, GPU)],
-  [Markup.callbackButton(PSU, PSU), Markup.callbackButton(MOBO, MOBO)],
-  [Markup.callbackButton(RAM, RAM), Markup.callbackButton(STORAGE, STORAGE)],
-  [Markup.callbackButton(COMPLETE_PC, COMPLETE_PC), Markup.callbackButton(PERIPHERALS, PERIPHERALS)],
-  [Markup.callbackButton(CASE, CASE), Markup.callbackButton(OTHER, OTHER)],
-  [Markup.callbackButton(HOME, HOME)],
-]).resize();
+const getSelectCategoryMarkup = () => {
+  return Markup.inlineKeyboard([
+    [Markup.callbackButton(categories.CPU, categories.CPU), Markup.callbackButton(categories.GPU, categories.GPU)],
+    [Markup.callbackButton(categories.PSU, categories.PSU), Markup.callbackButton(categories.MOBO, categories.MOBO)],
+    [
+      Markup.callbackButton(categories.RAM, categories.RAM),
+      Markup.callbackButton(categories.STORAGE, categories.STORAGE),
+    ],
+    [
+      Markup.callbackButton(categories.CASE, categories.CASE),
+      Markup.callbackButton(categories.PERIPHERALS, categories.PERIPHERALS),
+    ],
+    [Markup.callbackButton(categories.COMPLETE_PC, categories.COMPLETE_PC)],
+    [Markup.callbackButton(categories.OTHER, categories.OTHER)],
+  ]).resize();
+};
 
 const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Nuovo Annuncio di Vendita', NEW_INSERTION)],
@@ -129,7 +122,7 @@ const getWelcomeMessage = first_name => {
 
 module.exports = {
   startMenuMarkup,
-  categoryMenuMarkup,
+  getSelectCategoryMarkup,
   generateCaption,
   generateSearchAnnouncement,
   sellItemMenuMarkup,

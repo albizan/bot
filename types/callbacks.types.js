@@ -14,27 +14,22 @@ exports.HYPE = 'hype';
 exports.CASH = 'cash';
 exports.TRANSFER = 'transfer';
 
-// These need to be removed
-exports.CPU = 'Processori';
-exports.GPU = 'Schede Video';
-exports.RAM = 'RAM';
-exports.MOBO = 'Scheda Madre';
-exports.PSU = 'Alimentatori';
-exports.STORAGE = 'Storage';
-exports.CASE = 'Case';
-exports.PERIPHERALS = 'Accessori';
-exports.COMPLETE_PC = 'PC Completo';
-exports.OTHER = 'Altro';
+exports.payments = {
+  PAYPAL: 'paypal',
+  HYPE: 'hype',
+  CASH: 'cash',
+  TRANSFER: 'transfer',
+};
 
 exports.categories = {
   CPU: 'Processori',
-  GPU: 'Schede Video',
+  GPU: 'Schede_Video',
   RAM: 'RAM',
-  MOBO: 'Scheda Madre',
+  MOBO: 'Scheda_Madre',
   PSU: 'Alimentatori',
   STORAGE: 'Storage',
   CASE: 'Case',
-  PERIPHERALS: 'Accessori',
+  PERIPHERALS: 'Periferiche',
   COMPLETE_PC: 'PC Completo',
   OTHER: 'Altro',
 };
