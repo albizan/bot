@@ -3,9 +3,11 @@ const setupDeleteCommand = require('./delete.js');
 const setupMuteCommand = require('./mute.js');
 const setupUnmuteCommand = require('./unmute.js');
 
-module.exports = {
-  setupMuteCommand,
-  setupUnmuteCommand,
-  setupApproveCommand,
-  setupDeleteCommand,
-};
+function setupAdministrationCommands(bot) {
+  setupApproveCommand(bot);
+  setupMuteCommand(bot);
+  setupUnmuteCommand(bot);
+  setupDeleteCommand(bot);
+}
+
+module.exports = setupAdministrationCommands;

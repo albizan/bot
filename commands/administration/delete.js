@@ -8,11 +8,11 @@ function setupDeleteCommand(bot) {
     }
     const [insertionTag] = ctx.state.command.args;
     if (!insertionTag) {
+      ctx.reply("Argomenti insufficienti, digita anche l'id dell'annuncio");
       return;
     }
     const insertionType = insertionTag.substring(0, 2);
     const insertionId = insertionTag.substring(2);
-    console.log(insertionTag);
     switch (insertionType) {
       case 'av':
         try {
