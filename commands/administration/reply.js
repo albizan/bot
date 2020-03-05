@@ -1,7 +1,7 @@
 const knex = require('../../db');
 
 const setupReplyCommand = bot => {
-  bot.command('reply', async ctx => {
+  bot.command('rispondi', async ctx => {
     const { id } = ctx.from;
     if (!process.env.ADMINS.includes(id)) {
       ctx.reply('Non sei un admin');
