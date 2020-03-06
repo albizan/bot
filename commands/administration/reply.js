@@ -1,7 +1,11 @@
 const knex = require('../../db');
 
+const { REPLY_TO_ADMINS } = require('../../types/callbacks.types');
+
+const Markup = require('telegraf/markup');
+
 const setupReplyCommand = bot => {
-  bot.command('rispondi', async ctx => {
+  bot.command('send', async ctx => {
     const { id } = ctx.from;
     if (!process.env.ADMINS.includes(id)) {
       ctx.reply('Non sei un admin');
@@ -20,7 +24,6 @@ const setupReplyCommand = bot => {
       return;
     }
     try {
-      console.log('DB');
       const res = await knex('users')
         .select('id')
         .where({ username })
@@ -35,9 +38,9 @@ const setupReplyCommand = bot => {
       ctx.reply(error.message);
     }
     try {
-      console.log('Sending...');
       await ctx.telegram.sendMessage(userId, `<b>DA STAFF:</b>\n\n${message}`, {
         parse_mode: 'HTML',
+        reply_markup: Markup.inlineKeyboard([[Markup.callbackButton('Premi qui per rispondere ...', REPLY_TO_ADMINS)]]),
       });
       ctx.reply('Il tuo messaggio è stato inviato');
     } catch (error) {

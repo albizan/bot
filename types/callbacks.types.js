@@ -2,6 +2,7 @@
 exports.NEW_INSERTION = 'Sell Product';
 exports.SEARCH_INSERTION_BY_CATEGORY = 'Search Inserion';
 exports.BOT_INFO = 'Bot Info';
+exports.REPLY_TO_ADMINS = 'Reply To Admins';
 
 exports.SUPPORT_CHAT = 'support_chat';
 exports.SEEK_ITEM = 'seek_item';

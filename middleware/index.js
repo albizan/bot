@@ -14,9 +14,10 @@ const setupActions = require('./actions');
 // Import Wizard Scenes
 const newInsertionWizard = require('../wizards/newInsertion');
 const searchInsertionByCategory = require('../wizards/searchInsertionByCategory');
+const replyToAdminsWizard = require('../wizards/replyToAdmins');
 
 // Compose stage with given scenes
-const stage = new Stage([newInsertionWizard, searchInsertionByCategory]);
+const stage = new Stage([newInsertionWizard, searchInsertionByCategory, replyToAdminsWizard]);
 
 function setupMiddleware(bot) {
   bot.use(ignoreOldUpdates);
