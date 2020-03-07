@@ -1,4 +1,4 @@
-const knex = require('../../db');
+const { deleteInsertion } = require('../../db/helper');
 
 function setupDeleteCommand(bot) {
   bot.command('delete', async ctx => {
@@ -16,9 +16,7 @@ function setupDeleteCommand(bot) {
     switch (insertionType) {
       case 'av':
         try {
-          const result = await knex('insertions')
-            .where({ id: insertionId })
-            .del();
+          const result = await deleteInsertion(insertionId);
           if (result) {
             ctx.reply(`Annuncio n°${insertionId} eliminato`);
           } else {
