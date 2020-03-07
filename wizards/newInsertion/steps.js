@@ -458,6 +458,11 @@ const updatePaymentMethods = async ctx => {
       } = ctx.wizard.state;
       const { username, id, first_name } = ctx.from;
 
+      // Set max length for images
+      if (images.length > 10) {
+        images.length = 10;
+      }
+
       // generate array of inputMediaPhoto to be sent with sendMediaGroup
       const media = images.map(file_id => {
         return {

@@ -5,6 +5,7 @@ function setupApproveCommand(bot) {
   bot.command('approve', async ctx => {
     const { id } = ctx.from;
     if (!process.env.ADMINS.includes(id)) {
+      ctx.reply('Non sei admin');
       return;
     }
 
@@ -15,6 +16,7 @@ function setupApproveCommand(bot) {
     }
 
     if (!reply_to_message.caption) {
+      ctx.reply('Questo comando deve essere usato come risposta ad un annuncio');
       return;
     }
     // Get announce id from caption's entities

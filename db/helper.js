@@ -18,6 +18,12 @@ async function saveImagesIds(messages, insertion_id) {
   });
 }
 
+async function retrieveMessagesIds(insertion_id) {
+  return await knex('messages')
+    .select('message_id')
+    .where({ insertion_id });
+}
+
 const upsert = params => {
   const { table, object, constraint } = params;
   const insert = knex(table).insert(object);
@@ -32,4 +38,5 @@ module.exports = {
   deleteInsertion,
   retreiveInsertionById,
   saveImagesIds,
+  retrieveMessagesIds,
 };
