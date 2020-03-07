@@ -1,4 +1,5 @@
 const knex = require('../../db');
+const { saveImagesIds } = require('../../db/helper');
 
 function setupApproveCommand(bot) {
   bot.command('approve', async ctx => {
@@ -9,9 +10,7 @@ function setupApproveCommand(bot) {
 
     const { reply_to_message } = ctx.message;
     if (!reply_to_message) {
-      ctx.reply(
-        'Questo comando deve essere usato come risposta ad un annuncio'
-      );
+      ctx.reply('Questo comando deve essere usato come risposta ad un annuncio');
       return;
     }
 
@@ -53,14 +52,17 @@ function setupApproveCommand(bot) {
         media[0].caption = reply_to_message.caption;
       }
 
-      insertion = await ctx.telegram.sendMediaGroup(
-        process.env.CHANNEL_USERNAME,
-        media
-      );
-      // generate url
-      const url = `https://t.me/${process.env.CHANNEL_USERNAME.slice(1)}/${
-        insertion[0].message_id
-      }`;
+      // Insertion is a list of messages
+      insertion = await ctx.telegram.sendMediaGroup(process.env.CHANNEL_USERNAME, media);
+      // generate url of first message in media group
+      const url = `https://t.me/${process.env.CHANNEL_USERNAME.slice(1)}/${insertion[0].message_id}`;
+
+      // Save all images_id composing media group
+      try {
+        saveImagesIds(insertion, insertionId);
+      } catch (error) {
+        console.log(error);
+      }
 
       // Update dabase with newly created url
       await knex('insertions')
@@ -70,9 +72,7 @@ function setupApproveCommand(bot) {
       ctx.reply(url);
     } catch (error) {
       console.log(error);
-      ctx.reply(
-        'Errore, impossibile inviare il tuo messaggio. Riprova piu tardi'
-      );
+      ctx.reply('Errore, impossibile inviare il tuo messaggio. Riprova piu tardi');
     }
   });
 }
