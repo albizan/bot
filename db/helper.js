@@ -30,6 +30,14 @@ async function retrieveMessagesIds(insertion_id) {
     .where({ insertion_id });
 }
 
+async function getUsers() {
+  try {
+    return await knex('users');
+  } catch (error) {
+    console.log(users);
+  }
+}
+
 const upsert = params => {
   const { table, object, constraint } = params;
   const insert = knex(table).insert(object);
@@ -45,4 +53,5 @@ module.exports = {
   retreiveInsertionById,
   saveImagesIds,
   retrieveMessagesIds,
+  getUsers,
 };
