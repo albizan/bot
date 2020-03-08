@@ -5,7 +5,7 @@ const { REPLY_TO_ADMINS } = require('../../types/callbacks.types');
 const Markup = require('telegraf/markup');
 
 const setupReplyCommand = bot => {
-  bot.command('send', async ctx => {
+  bot.command('comunica', async ctx => {
     const { id } = ctx.from;
     if (!process.env.ADMINS.includes(id)) {
       ctx.reply('Non sei un admin');
