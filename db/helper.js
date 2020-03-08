@@ -1,6 +1,12 @@
 const knex = require('./index');
 
-async function deleteInsertion(id) {
+async function deleteInsertion(id, ctx) {
+  // Insertion is composed by several messages, get those messages and delete all of them from submitted channel
+  const messages = await retrieveMessagesIds(id);
+  messages.forEach(({ message_id }) => {
+    ctx.telegram.deleteMessage(process.env.CHANNEL_USERNAME, message_id);
+  });
+
   return await knex('insertions')
     .where({ id })
     .del();

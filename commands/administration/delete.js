@@ -1,4 +1,4 @@
-const { deleteInsertion, retrieveMessagesIds } = require('../../db/helper');
+const { deleteInsertion } = require('../../db/helper');
 
 function setupDeleteCommand(bot) {
   bot.command('delete', async ctx => {
@@ -16,12 +16,7 @@ function setupDeleteCommand(bot) {
     switch (insertionType) {
       case 'av':
         try {
-          // Insertion is composed by several messages, get those messages and delete all of them from submitted channel
-          const messages = await retrieveMessagesIds(insertionId);
-          messages.forEach(({ message_id }) => {
-            ctx.telegram.deleteMessage(process.env.CHANNEL_USERNAME, message_id);
-          });
-          const result = await deleteInsertion(insertionId);
+          const result = await deleteInsertion(insertionId, ctx);
           if (result) {
             ctx.reply(`Annuncio n°${insertionId} eliminato`);
           } else {
