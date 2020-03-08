@@ -275,7 +275,7 @@ const confirmLocationAndAskForImages = async ctx => {
       return ctx.scene.leave();
     case NEXT_STEP:
       await ctx.reply(
-        "<b>Invia una o piu foto del prodotto\nPuoi utilizzare esclusivamente immagini reali da te scattate che mostrino chiaramente il tuo tag telegram.\nGli annunci che non soddifano questi requisiti saranno scartati</b>\n<em>Quando hai finito premi sul pulsante 'Avanti'</em>",
+        "<b>Invia al massimo 10 foto del prodotto\nPuoi utilizzare esclusivamente immagini reali da te scattate che mostrino chiaramente il tuo tag telegram.\nGli annunci che non soddifano questi requisiti saranno scartati</b>\n<em>Quando hai finito premi sul pulsante 'Avanti'</em>",
         {
           parse_mode: 'HTML',
           reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
