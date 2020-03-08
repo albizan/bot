@@ -20,7 +20,6 @@ const setupStatsCommand = bot => {
         const message = users.reduce((message, user) => {
           return (message += `@${user.username}\n`);
         }, '');
-        console.log(message);
         ctx.telegram.sendMessage(process.env.SECRET_CHAT_ID, message);
         break;
     }
