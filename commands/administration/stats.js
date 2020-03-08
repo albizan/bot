@@ -1,7 +1,7 @@
 const { getUsers } = require('../../db/helper');
 
 const setupStatsCommand = bot => {
-  bot.command('stats', async ctx => {
+  bot.command('ottieni', async ctx => {
     const { id } = ctx.from;
     if (!process.env.ADMINS.includes(id)) {
       ctx.reply('Non sei un admin');
@@ -21,7 +21,7 @@ const setupStatsCommand = bot => {
           return (message += `@${user.username}\n`);
         }, '');
         console.log(message);
-        ctx.telegram.sendMessage(process.env.MIT_GROUP, message);
+        ctx.telegram.sendMessage(process.env.SECRET_CHAT_ID, message);
         break;
     }
   });
