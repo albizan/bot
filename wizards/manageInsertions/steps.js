@@ -38,7 +38,7 @@ async function manageInsertion(ctx) {
   try {
     deleteInsertion(data, ctx);
     ctx.editMessageReplyMarkup(
-      Markup.inlineKeyboard([[Markup.callbackButton(`${siren} Annuncio Eliminato ${siren}`, 'no-action-required')]])
+      Markup.inlineKeyboard([[Markup.callbackButton(`${siren} Annuncio Eliminato ${siren}`, 'home')]])
     );
   } catch (error) {
     console.log(error);

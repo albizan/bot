@@ -2,7 +2,7 @@ const Markup = require('telegraf/markup');
 var CronJob = require('cron').CronJob;
 
 const cronJob = bot => {
-  const sendMessageToGroupJob = new CronJob('0 0 */6 * * *', function() {
+  const sendMessageToGroupJob = new CronJob('0 0 */12 * * *', function() {
     console.log('Sending message...');
     try {
       bot.telegram.sendMessage(
