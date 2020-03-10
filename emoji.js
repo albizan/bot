@@ -10,4 +10,5 @@ module.exports = {
   sos: '\u{1F198}',
   conditions: '\u{1F527}',
   pushPin: '\u{1F4CC}',
+  siren: '\u{1F6A8}',
 };

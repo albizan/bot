@@ -4,6 +4,7 @@ const { NEW_INSERTION_WIZARD } = require('../../types/scenes.types');
 
 function setupNewInsertion(bot) {
   bot.action(NEW_INSERTION, ctx => {
+    console.log('New insertion');
     ctx.answerCbQuery();
     ctx.scene.enter(NEW_INSERTION_WIZARD);
   });

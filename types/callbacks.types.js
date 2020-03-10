@@ -2,14 +2,16 @@
 exports.NEW_INSERTION = 'Sell Product';
 exports.SEARCH_INSERTION_BY_CATEGORY = 'Search Inserion';
 exports.BOT_INFO = 'Bot Info';
-exports.REPLY_TO_ADMINS = 'Reply To Admins';
+exports.MANAGE_INSERTIONS = 'Manage Insertions';
 
-exports.SUPPORT_CHAT = 'support_chat';
-exports.SEEK_ITEM = 'seek_item';
+// Single Actions
+exports.REPLY_TO_ADMINS = 'Reply To Admins';
+exports.HOME = 'Home';
+
 exports.NEXT_STEP = 'next_step';
 exports.PREVIOUS_STEP = 'previous_step';
 exports.CLOSE_WIZARD = 'close_wizard';
-exports.HOME = 'Home';
+
 exports.PAYPAL = 'paypal';
 exports.HYPE = 'hype';
 exports.CASH = 'cash';

@@ -38,6 +38,12 @@ async function getUsers() {
   }
 }
 
+async function getInsertionsByUser(user_id) {
+  return await knex('insertions')
+    .where({ user_id })
+    .whereNotNull('url');
+}
+
 const upsert = params => {
   const { table, object, constraint } = params;
   const insert = knex(table).insert(object);
@@ -53,5 +59,6 @@ module.exports = {
   retreiveInsertionById,
   saveImagesIds,
   retrieveMessagesIds,
+  getInsertionsByUser,
   getUsers,
 };

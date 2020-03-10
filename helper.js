@@ -7,6 +7,7 @@ const { package, memo, moneyBag, moneyFly, silhouette, checkMark, conditions, pu
 // Import callback query types
 const {
   NEW_INSERTION,
+  MANAGE_INSERTIONS,
   BOT_INFO,
   SEARCH_INSERTION_BY_CATEGORY,
   NEXT_STEP,
@@ -99,11 +100,10 @@ const getSelectCategoryMarkup = () => {
 };
 
 const startMenuMarkup = Markup.inlineKeyboard([
-  [Markup.callbackButton('Nuovo Annuncio di Vendita', NEW_INSERTION)],
-  // [Markup.callbackButton('Nuovo Annuncio di Ricerca', SEEK_ITEM)],
-  [Markup.callbackButton('Cerca per Categoria', SEARCH_INSERTION_BY_CATEGORY)],
+  [Markup.callbackButton('Nuovo annuncio', NEW_INSERTION)],
+  [Markup.callbackButton('I miei annunci', MANAGE_INSERTIONS)],
+  [Markup.callbackButton('Cerca per categoria', SEARCH_INSERTION_BY_CATEGORY)],
   [Markup.callbackButton('Info sul BOT', BOT_INFO)],
-  // [Markup.callbackButton('Supporto', SUPPORT_CHAT)],
 ]).resize();
 
 const upsert = params => {

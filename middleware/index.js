@@ -15,9 +15,10 @@ const setupActions = require('./actions');
 const newInsertionWizard = require('../wizards/newInsertion');
 const searchInsertionByCategory = require('../wizards/searchInsertionByCategory');
 const replyToAdminsWizard = require('../wizards/replyToAdmins');
+const manageInsertions = require('../wizards/manageInsertions');
 
 // Compose stage with given scenes
-const stage = new Stage([newInsertionWizard, searchInsertionByCategory, replyToAdminsWizard]);
+const stage = new Stage([newInsertionWizard, searchInsertionByCategory, replyToAdminsWizard, manageInsertions]);
 
 function setupMiddleware(bot) {
   bot.use(ignoreOldUpdates);
