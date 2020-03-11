@@ -12,11 +12,6 @@ exports.NEXT_STEP = 'next_step';
 exports.PREVIOUS_STEP = 'previous_step';
 exports.CLOSE_WIZARD = 'close_wizard';
 
-exports.PAYPAL = 'paypal';
-exports.HYPE = 'hype';
-exports.CASH = 'cash';
-exports.TRANSFER = 'transfer';
-
 exports.payments = {
   PAYPAL: 'paypal',
   HYPE: 'hype',
