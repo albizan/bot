@@ -5,13 +5,13 @@ const { startMenuMarkup, getWelcomeMessage } = require('../../helper');
 // Import Steps
 const { showInsertions, manageInsertion } = require('./steps');
 
-const manageInsertionsWizard = new WizardScene(MANAGE_INSERTIONS_WIZARD, showInsertions, manageInsertion);
+const manageInsertions = new WizardScene(MANAGE_INSERTIONS_WIZARD, showInsertions, manageInsertion);
 
-manageInsertionsWizard.command(['quit, home', 'start'], ctx => {
+manageInsertions.command(['quit, home', 'start'], ctx => {
   ctx.scene.leave();
 });
 
-manageInsertionsWizard.leave(ctx => {
+manageInsertions.leave(ctx => {
   const { id, first_name } = ctx.from;
   try {
     ctx.telegram.sendMessage(id, getWelcomeMessage(first_name), {
@@ -22,4 +22,4 @@ manageInsertionsWizard.leave(ctx => {
     console.log(error);
   }
 });
-module.exports = manageInsertionsWizard;
+module.exports = manageInsertions;

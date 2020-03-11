@@ -21,7 +21,7 @@ const {
 const { NEW_INSERTION_WIZARD } = require('../../types/scenes.types');
 
 // A wizard is a special type of scene
-const newInsertionWizard = new WizardScene(
+const newInsertion = new WizardScene(
   // Wizard's name
   NEW_INSERTION_WIZARD,
   // Steps
@@ -41,11 +41,11 @@ const newInsertionWizard = new WizardScene(
   updatePaymentMethods
 );
 
-newInsertionWizard.command(['home', 'quit', 'start'], ctx => {
+newInsertion.command(['home', 'quit', 'start'], ctx => {
   return ctx.scene.leave();
 });
 
-newInsertionWizard.leave(ctx => {
+newInsertion.leave(ctx => {
   const { id, first_name } = ctx.from;
   try {
     ctx.telegram.sendMessage(id, getWelcomeMessage(first_name), {
@@ -58,5 +58,4 @@ newInsertionWizard.leave(ctx => {
   }
 });
 
-newInsertionWizard.leave();
-module.exports = newInsertionWizard;
+module.exports = newInsertion;

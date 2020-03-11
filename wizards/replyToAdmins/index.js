@@ -4,7 +4,7 @@ const { REPLY_TO_ADMINS_WIZARD } = require('../../types/scenes.types');
 // Import Steps
 const {} = require('./steps');
 
-const replyToAdminsWizard = new WizardScene(
+const replyToAdmins = new WizardScene(
   REPLY_TO_ADMINS_WIZARD,
   ctx => {
     ctx.reply('<b>Digita la tua risposta</b>', { parse_mode: 'HTML' });
@@ -41,9 +41,9 @@ const replyToAdminsWizard = new WizardScene(
   }
 );
 
-replyToAdminsWizard.command(['quit, home'], ctx => {
+replyToAdmins.command(['quit, home'], ctx => {
   ctx.scene.leave();
 });
 
-replyToAdminsWizard.leave();
-module.exports = replyToAdminsWizard;
+replyToAdmins.leave();
+module.exports = replyToAdmins;

@@ -1,5 +1,5 @@
 const setupHome = require('./home');
-const setupNewInsertion = require('./sellProduct');
+const setupNewInsertion = require('./newInsertion');
 const setupSearchInsertionByCategory = require('./searchInsertionByCategory');
 const setupBotInfo = require('./botInfo');
 const setupReplyToAdmins = require('./replyToAdmins');
