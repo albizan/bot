@@ -4,7 +4,6 @@ exports.SEARCH_INSERTION_BY_CATEGORY = 'Search Inserion';
 exports.BOT_INFO = 'Bot Info';
 exports.MANAGE_INSERTIONS = 'Manage Insertions';
 
-// Single Actions
 exports.REPLY_TO_ADMINS = 'Reply To Admins';
 exports.HOME = 'Home';
 
@@ -28,7 +27,7 @@ exports.categories = {
   STORAGE: 'Storage',
   CASE: 'Case',
   PERIPHERALS: 'Periferiche',
-  COMPLETE_PC: 'PC Completo',
+  COMPLETE_PC: 'PC_Completo',
   OTHER: 'Altro',
 };
 

@@ -3,7 +3,7 @@ const { startMenuMarkup, getWelcomeMessage } = require('../../helper');
 
 const {
   askForCategory,
-  confirmCategoryAndAskForTitle,
+  validateCategoryAndAskForTitle,
   validateTitle,
   confirmTitleAndAskForDescription,
   validateDescription,
@@ -26,7 +26,7 @@ const newInsertion = new WizardScene(
   NEW_INSERTION_WIZARD,
   // Steps
   askForCategory,
-  confirmCategoryAndAskForTitle,
+  validateCategoryAndAskForTitle,
   validateTitle,
   confirmTitleAndAskForDescription,
   validateDescription,
@@ -54,7 +54,6 @@ newInsertion.leave(ctx => {
     });
   } catch (error) {
     logger.error(error);
-    return;
   }
 });
 

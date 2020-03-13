@@ -13,22 +13,12 @@ const {
   NEXT_STEP,
   PREVIOUS_STEP,
   CLOSE_WIZARD,
+  HOME,
   payments,
   categories,
 } = require('./types/callbacks.types');
 
-const generateCaption = (
-  insertionId,
-  category,
-  username,
-  title,
-  description,
-  value,
-  paymentMethods,
-  condition,
-  location,
-  shippingCosts
-) => {
+const generateCaption = (insertionId, category, username, title, description, value, paymentMethods, condition, location, shippingCosts) => {
   const ss = shippingCosts => {
     if (shippingCosts === 'Consegna a mano') {
       return `(${shippingCosts})`;
@@ -54,14 +44,6 @@ const generateSearchAnnouncement = (first_name, username, id, title, description
     \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
 };
 
-const sellItemMenuMarkup = Markup.inlineKeyboard([
-  [
-    Markup.callbackButton(`Modifica`, PREVIOUS_STEP),
-    Markup.callbackButton('Esci', CLOSE_WIZARD),
-    Markup.callbackButton(`Avanti`, NEXT_STEP),
-  ],
-]).resize();
-
 // Return the reply_markup with an inline keyboard used to choose payment methods
 const getPaymentMethodsMenuMarkup = paymentMethods => {
   return Markup.inlineKeyboard(generatePaymentsInlineKeyboard(paymentMethods));
@@ -80,23 +62,6 @@ const generatePaymentsInlineKeyboard = paymentMethods => {
     ],
     [Markup.callbackButton('Annulla', CLOSE_WIZARD), Markup.callbackButton('Avanti', NEXT_STEP)],
   ];
-};
-
-const getSelectCategoryMarkup = () => {
-  return Markup.inlineKeyboard([
-    [Markup.callbackButton(categories.CPU, categories.CPU), Markup.callbackButton(categories.GPU, categories.GPU)],
-    [Markup.callbackButton(categories.PSU, categories.PSU), Markup.callbackButton(categories.MOBO, categories.MOBO)],
-    [
-      Markup.callbackButton(categories.RAM, categories.RAM),
-      Markup.callbackButton(categories.STORAGE, categories.STORAGE),
-    ],
-    [
-      Markup.callbackButton(categories.CASE, categories.CASE),
-      Markup.callbackButton(categories.PERIPHERALS, categories.PERIPHERALS),
-    ],
-    [Markup.callbackButton(categories.COMPLETE_PC, categories.COMPLETE_PC)],
-    [Markup.callbackButton(categories.OTHER, categories.OTHER)],
-  ]).resize();
 };
 
 const startMenuMarkup = Markup.inlineKeyboard([
@@ -122,10 +87,8 @@ const getWelcomeMessage = first_name => {
 
 module.exports = {
   startMenuMarkup,
-  getSelectCategoryMarkup,
   generateCaption,
   generateSearchAnnouncement,
-  sellItemMenuMarkup,
   getPaymentMethodsMenuMarkup,
   generatePaymentsInlineKeyboard,
   upsert,
