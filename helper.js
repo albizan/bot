@@ -29,8 +29,8 @@ function getSelectCategoryMarkup() {
     [Markup.callbackButton(categories.CPU, categories.CPU), Markup.callbackButton(categories.GPU, categories.GPU)],
     [Markup.callbackButton(categories.PSU, categories.PSU), Markup.callbackButton(categories.MOBO, categories.MOBO)],
     [Markup.callbackButton(categories.RAM, categories.RAM), Markup.callbackButton(categories.STORAGE, categories.STORAGE)],
-    [Markup.callbackButton(categories.CASE, categories.CASE), Markup.callbackButton(categories.PERIPHERALS, categories.PERIPHERALS)],
-    [Markup.callbackButton(categories.COMPLETE_PC, categories.COMPLETE_PC), Markup.callbackButton(categories.OTHER, categories.OTHER)],
+    [Markup.callbackButton(categories.COMPLETE_PC, categories.COMPLETE_PC), Markup.callbackButton(categories.PERIPHERALS, categories.PERIPHERALS)],
+    [Markup.callbackButton(categories.CASE, categories.CASE), Markup.callbackButton(categories.OTHER, categories.OTHER)],
     [Markup.callbackButton('Torna alla Home', HOME)],
   ]).resize();
 }

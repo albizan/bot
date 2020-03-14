@@ -6,17 +6,6 @@ const { HOME, NEXT_STEP, PREVIOUS_STEP, categories, conditions, payments } = req
 
 const { package, memo, moneyBag, moneyFly, silhouette, checkMark, conditionMark, pushPin } = require('../../emoji');
 
-function getSelectCategoryMarkup() {
-  return Markup.inlineKeyboard([
-    [Markup.callbackButton(categories.CPU, categories.CPU), Markup.callbackButton(categories.GPU, categories.GPU)],
-    [Markup.callbackButton(categories.PSU, categories.PSU), Markup.callbackButton(categories.MOBO, categories.MOBO)],
-    [Markup.callbackButton(categories.RAM, categories.RAM), Markup.callbackButton(categories.STORAGE, categories.STORAGE)],
-    [Markup.callbackButton(categories.CASE, categories.CASE), Markup.callbackButton(categories.PERIPHERALS, categories.PERIPHERALS)],
-    [Markup.callbackButton(categories.COMPLETE_PC, categories.COMPLETE_PC), Markup.callbackButton(categories.OTHER, categories.OTHER)],
-    [Markup.callbackButton('Torna alla Home', HOME)],
-  ]).resize();
-}
-
 function insertionWizardPrompt() {
   return Markup.inlineKeyboard([
     [Markup.callbackButton(`<< Modifica`, PREVIOUS_STEP), Markup.callbackButton('Home', HOME), Markup.callbackButton(`Avanti >>`, NEXT_STEP)],
@@ -183,7 +172,6 @@ function handlePaymentToggle(ctx, payment) {
 }
 
 module.exports = {
-  getSelectCategoryMarkup,
   insertionWizardPrompt,
   getConditionsMarkup,
   getPaymentMethodsMenuMarkup,

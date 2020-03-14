@@ -1,16 +1,9 @@
 const Markup = require('telegraf/markup');
 const { package } = require('../../emoji');
 
-const {
-  getSelectCategoryMarkup,
-  insertionWizardPrompt,
-  getConditionsMarkup,
-  getPaymentMethodsMenuMarkup,
-  handleAnnounce,
-  handlePaymentToggle,
-} = require('./helper');
+const { insertionWizardPrompt, getConditionsMarkup, getPaymentMethodsMenuMarkup, handleAnnounce, handlePaymentToggle } = require('./helper');
 
-const { filterUpdates } = require('../../helper');
+const { filterUpdates, getSelectCategoryMarkup } = require('../../helper');
 
 // Import callback query types
 const { NEXT_STEP, PREVIOUS_STEP, HOME, payments, categories, conditions, shippingCosts } = require('../../types/callbacks.types');
@@ -144,7 +137,7 @@ function confirmLocationAndAskForImages(ctx) {
   switch (data) {
     case NEXT_STEP:
       ctx.reply(
-        "<b>Invia al massimo 8 foto del prodotto\nNelle immagini deve essere chiaramente visibile il tuo tag telegram</b>\n\n<em>Quando hai finito premi sul pulsante 'Avanti'</em>",
+        "<b>Invia al massimo 8 foto del prodotto</b>\n<em>Nelle immagini deve essere chiaramente visibile il tuo tag telegram\n\nQuando tutte le foto sono state caricate, premi sul pulsante 'Avanti'</em>",
         {
           parse_mode: 'HTML',
           reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
