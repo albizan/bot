@@ -226,8 +226,7 @@ function priceConfirmationAndSelectShippingCosts(ctx) {
       ctx.reply('<b>Le spese di spedizione sono...</b>', {
         parse_mode: 'HTML',
         reply_markup: Markup.inlineKeyboard([
-          [Markup.callbackButton('Incluse', 'incluse')],
-          [Markup.callbackButton('Escluse', 'escluse')],
+          [Markup.callbackButton('Incluse', 'incluse'), Markup.callbackButton('Escluse', 'escluse')],
           [Markup.callbackButton('Consegna a mano', 'Consegna a mano')],
         ]),
       });
