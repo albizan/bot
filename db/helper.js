@@ -54,12 +54,26 @@ function upsert(params) {
     .get(0);
 }
 
+async function getInsertionsByCategory(category) {
+  try {
+    return await knex('insertions')
+      .select('product', 'url')
+      .whereNotNull('url')
+      .where({ category });
+  } catch (error) {
+    console.log(error);
+    ctx.reply('Impossibile ottenere le inserzioni, si è verificato un errore');
+    ctx.scene.leave();
+  }
+}
+
 module.exports = {
   deleteInsertion,
   retreiveInsertionById,
   saveImagesIds,
   retrieveMessagesIds,
   getInsertionsByUser,
+  getInsertionsByCategory,
   getUsers,
   upsert,
 };

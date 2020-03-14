@@ -5,14 +5,12 @@ const { getSelectCategoryMarkup, filterUpdates } = require('../../helper');
 const { package } = require('../../emoji');
 
 // Import Database
-const knex = require('../../db');
+const { getInsertionsByCategory } = require('../../db/helper');
 
 // Import types
-const { categories } = require('../../types/callbacks.types');
+const { categories, HOME } = require('../../types/callbacks.types');
 
-const askForCategory = ctx => {
-  let insertions;
-
+function askForCategory(ctx) {
   ctx.reply(
     `<b>${package} RICERCA ANNUNCI ${package}\n\nSei entrato nel wizard che ti guiderà nella ricerca di un annuncio di vendita\nTi ricordo che in qualunque momento puoi usare il comando /home per tornare al menu principale\n\nSeleziona una categoria</b>`,
     {
@@ -21,42 +19,35 @@ const askForCategory = ctx => {
     }
   );
   ctx.wizard.next();
-};
+}
 
-const showInsertions = async ctx => {
+async function showInsertions(ctx) {
   const data = filterUpdates(ctx, 'callback_query');
   if (!Object.values(categories).includes(data)) {
     return;
   }
-  try {
-    insertions = await knex('insertions')
-      .select('product', 'url')
-      .whereNotNull('url')
-      .where({ category: data });
-  } catch (error) {
-    console.log(error);
-    ctx.reply('Impossibile ottenere le inserzioni, si è verificato un errore');
-    ctx.scene.leave();
+  const insertions = await getInsertionsByCategory(data);
+  if (!insertions) {
     return;
   }
-  const buttons = insertions.map(row => [Markup.urlButton(`${row.product}`, row.url)]);
-  if (buttons.length === 0) {
-    await ctx.reply(`<b>${data.toUpperCase()}:</b> nessuna inserzione trovata`, {
+  if (insertions.length === 0) {
+    await ctx.reply(`<b>${data.toUpperCase()}:</b> nessuna inserzione trovata\n\nPer tornare alla home...`, {
       parse_mode: 'HTML',
       reply_markup: getGoHomeMarkup(),
     });
   } else {
+    const buttons = insertions.map(row => [Markup.urlButton(`${row.product}`, row.url)]);
     buttons.push([Markup.callbackButton('Home', 'Home')]);
-    await ctx.reply(`${data}: ${insertions.length} ${insertions.length === 1 ? 'inserzione trovata' : 'inserzioni trovate'}`, {
+    ctx.reply(`${data}: ${insertions.length} ${insertions.length === 1 ? 'inserzione trovata' : 'inserzioni trovate'}`, {
       reply_markup: Markup.inlineKeyboard(buttons),
     });
   }
   ctx.wizard.next();
   return;
-};
+}
 
 const getGoHomeMarkup = () => {
-  return Markup.inlineKeyboard([[Markup.callbackButton('Home', 'Home')]]).resize();
+  return Markup.inlineKeyboard([[Markup.callbackButton('... premi qua', HOME)]]).resize();
 };
 
 module.exports = {
