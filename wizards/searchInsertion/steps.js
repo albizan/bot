@@ -7,12 +7,6 @@ const { NEXT_STEP, PREVIOUS_STEP, HOME } = require('../../types/callbacks.types'
 // Import emojis
 const { package, memo, moneyBag } = require('../../emoji');
 
-/*
-  Step 1 of Wizard - Ask For Title
-  Initialize wizard's state for current wizard instance.
-  The state will be automatically deleted when leaving the wizard with ctx.scene.leave()
-  Prompt user to write title
-*/
 function askForTitle(ctx) {
   ctx.reply('<b>Che prodotto stai cercando?</b>\n(10 - 50 caratteri)', {
     parse_mode: 'HTML',
@@ -151,7 +145,7 @@ function insertionWizardPrompt() {
 
 const generateSearchAnnouncement = (username, id, title, description, price) => {
   return `
-    ${username} STA CERCANDO:
+    @${username} STA CERCANDO:
     \n${package} Prodotto: ${package}\n${title}
     \n\n${memo} Descrizione ${memo}\n${description}
     \n\n${moneyBag} Prezzo: ${moneyBag}\n${price}€`;
