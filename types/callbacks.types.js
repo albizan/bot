@@ -12,10 +12,10 @@ exports.PREVIOUS_STEP = 'previous_step';
 exports.CLOSE_WIZARD = 'close_wizard';
 
 exports.payments = {
-  PAYPAL: 'paypal',
-  HYPE: 'hype',
-  CASH: 'cash',
-  TRANSFER: 'transfer',
+  PAYPAL: 'Paypal',
+  HYPE: 'Hype',
+  CASH: 'Contanti',
+  TRANSFER: 'Bonifico',
 };
 
 exports.categories = {
@@ -37,4 +37,10 @@ exports.conditions = {
   GOOD: 'Buone Condizioni',
   ACCEPTABLE: 'Accettabile',
   BROKEN: 'Rotto/Pezzi di Ricambio',
+};
+
+exports.shippingCosts = {
+  INCLUDING: 'incluse',
+  EXCLUDING: 'escluse',
+  HAND_DELIVERY: 'Consegna a mano',
 };

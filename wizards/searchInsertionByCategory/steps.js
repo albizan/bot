@@ -1,6 +1,8 @@
 const { Markup } = require('telegraf');
 
-const { getSelectCategoryMarkup } = require('../../helper');
+const { getSelectCategoryMarkup, filterUpdates } = require('../../helper');
+
+const { package } = require('../../emoji');
 
 // Import Database
 const knex = require('../../db');
@@ -11,19 +13,18 @@ const { categories } = require('../../types/callbacks.types');
 const askForCategory = ctx => {
   let insertions;
 
-  ctx.reply('<b>SELEZIONA UNA CATEGORIA</b>', {
-    parse_mode: 'HTML',
-    reply_markup: getSelectCategoryMarkup(),
-  });
+  ctx.reply(
+    `<b>${package} RICERCA ANNUNCI ${package}\n\nSei entrato nel wizard che ti guiderà nella ricerca di un annuncio di vendita\nTi ricordo che in qualunque momento puoi usare il comando /home per tornare al menu principale\n\nSeleziona una categoria</b>`,
+    {
+      parse_mode: 'HTML',
+      reply_markup: getSelectCategoryMarkup(),
+    }
+  );
   ctx.wizard.next();
 };
 
 const showInsertions = async ctx => {
-  if (ctx.updateType !== 'callback_query') {
-    return;
-  }
-  ctx.answerCbQuery();
-  const { data } = ctx.callbackQuery;
+  const data = filterUpdates(ctx, 'callback_query');
   if (!Object.values(categories).includes(data)) {
     return;
   }
@@ -36,6 +37,7 @@ const showInsertions = async ctx => {
     console.log(error);
     ctx.reply('Impossibile ottenere le inserzioni, si è verificato un errore');
     ctx.scene.leave();
+    return;
   }
   const buttons = insertions.map(row => [Markup.urlButton(`${row.product}`, row.url)]);
   if (buttons.length === 0) {
@@ -45,14 +47,12 @@ const showInsertions = async ctx => {
     });
   } else {
     buttons.push([Markup.callbackButton('Home', 'Home')]);
-    await ctx.reply(
-      `${data}: ${insertions.length} ${insertions.length === 1 ? 'inserzione trovata' : 'inserzioni trovate'}`,
-      {
-        reply_markup: Markup.inlineKeyboard(buttons),
-      }
-    );
+    await ctx.reply(`${data}: ${insertions.length} ${insertions.length === 1 ? 'inserzione trovata' : 'inserzioni trovate'}`, {
+      reply_markup: Markup.inlineKeyboard(buttons),
+    });
   }
-  return ctx.wizard.next();
+  ctx.wizard.next();
+  return;
 };
 
 const getGoHomeMarkup = () => {

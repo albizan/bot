@@ -44,7 +44,7 @@ async function getInsertionsByUser(user_id) {
     .whereNotNull('url');
 }
 
-const upsert = params => {
+function upsert(params) {
   const { table, object, constraint } = params;
   const insert = knex(table).insert(object);
   const update = knex.queryBuilder().update(object);
@@ -52,7 +52,7 @@ const upsert = params => {
     .raw(`? ON CONFLICT ${constraint} DO ? returning *`, [insert, update])
     .get('rows')
     .get(0);
-};
+}
 
 module.exports = {
   deleteInsertion,
@@ -61,4 +61,5 @@ module.exports = {
   retrieveMessagesIds,
   getInsertionsByUser,
   getUsers,
+  upsert,
 };

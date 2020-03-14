@@ -1,40 +1,9 @@
 const Markup = require('telegraf/markup');
+const { upsert } = require('./db/helper');
 
-// Import Database
-const knex = require('./db');
-
-const { package, memo, moneyBag, moneyFly, silhouette, checkMark, conditions, pushPin } = require('./emoji');
+const { package, memo, moneyBag, moneyFly, silhouette } = require('./emoji');
 // Import callback query types
-const {
-  NEW_INSERTION,
-  MANAGE_INSERTIONS,
-  BOT_INFO,
-  SEARCH_INSERTION_BY_CATEGORY,
-  NEXT_STEP,
-  PREVIOUS_STEP,
-  CLOSE_WIZARD,
-  HOME,
-  payments,
-  categories,
-} = require('./types/callbacks.types');
-
-const generateCaption = (insertionId, category, username, title, description, value, paymentMethods, condition, location, shippingCosts) => {
-  const ss = shippingCosts => {
-    if (shippingCosts === 'Consegna a mano') {
-      return `(${shippingCosts})`;
-    }
-    return `(Spese di spedizione ${shippingCosts})`;
-  };
-  return `\n${package} Prodotto ${package}\n${title}
-    \n${conditions} Condizione ${conditions}\n${condition}
-    \n${memo} Descrizione ${memo}\n${description}
-    \n${moneyBag} Prezzo Richiesto ${moneyBag}\n${value}€ ${ss(shippingCosts)}
-    \n${pushPin} Località ${pushPin}\n${location}
-    \n${moneyFly}Pagamenti Accettati${moneyFly}\n${paymentMethods.join(', ')}
-    \n${silhouette} Contatto ${silhouette}\n@${username}
-    \n\nCategoria: #${category}
-    \n#av${insertionId}`;
-};
+const { NEW_INSERTION, MANAGE_INSERTIONS, BOT_INFO, SEARCH_INSERTION_BY_CATEGORY, HOME, categories } = require('./types/callbacks.types');
 
 const generateSearchAnnouncement = (first_name, username, id, title, description, price, paymentMethods) => {
   return `<b>NUOVO ANNUNCIO DI RICERCA</b>\n\n${package} Prodotto: ${package}\n${title}
@@ -44,26 +13,6 @@ const generateSearchAnnouncement = (first_name, username, id, title, description
     \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
 };
 
-// Return the reply_markup with an inline keyboard used to choose payment methods
-const getPaymentMethodsMenuMarkup = paymentMethods => {
-  return Markup.inlineKeyboard(generatePaymentsInlineKeyboard(paymentMethods));
-};
-
-// This is just the markup of the payment inline keyboard
-const generatePaymentsInlineKeyboard = paymentMethods => {
-  return [
-    [
-      Markup.callbackButton(`${paymentMethods.includes('Paypal') ? checkMark : ''} Paypal`, payments.PAYPAL),
-      Markup.callbackButton(`${paymentMethods.includes('Hype') ? checkMark : ''} Hype`, payments.HYPE),
-    ],
-    [
-      Markup.callbackButton(`${paymentMethods.includes('Contante') ? checkMark : ''} Contante`, payments.CASH),
-      Markup.callbackButton(`${paymentMethods.includes('Bonifico') ? checkMark : ''} Bonifico`, payments.TRANSFER),
-    ],
-    [Markup.callbackButton('Annulla', CLOSE_WIZARD), Markup.callbackButton('Avanti', NEXT_STEP)],
-  ];
-};
-
 const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Nuovo annuncio', NEW_INSERTION)],
   [Markup.callbackButton('I miei annunci', MANAGE_INSERTIONS)],
@@ -71,26 +20,78 @@ const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Info sul BOT', BOT_INFO)],
 ]).resize();
 
-const upsert = params => {
-  const { table, object, constraint } = params;
-  const insert = knex(table).insert(object);
-  const update = knex.queryBuilder().update(object);
-  return knex
-    .raw(`? ON CONFLICT ${constraint} DO ? returning *`, [insert, update])
-    .get('rows')
-    .get(0);
-};
-
 const getWelcomeMessage = first_name => {
   return `Ciao <b>${first_name}</b>\n\nBenvenuto/a nel BOT ufficiale del gruppo MIT - Mercatino Informatica e Tecnologia\n\nQuesto bot ti permette di creare annunci di vendita per le tue componenti informatiche e non solo.\n\nPrima di essere pubblicati sul canale ufficiale @mitvendita, gli annunci verranno valutati ed eventualmente approvati dallo <b>STAFF</b>`;
 };
 
+function getSelectCategoryMarkup() {
+  return Markup.inlineKeyboard([
+    [Markup.callbackButton(categories.CPU, categories.CPU), Markup.callbackButton(categories.GPU, categories.GPU)],
+    [Markup.callbackButton(categories.PSU, categories.PSU), Markup.callbackButton(categories.MOBO, categories.MOBO)],
+    [Markup.callbackButton(categories.RAM, categories.RAM), Markup.callbackButton(categories.STORAGE, categories.STORAGE)],
+    [Markup.callbackButton(categories.CASE, categories.CASE), Markup.callbackButton(categories.PERIPHERALS, categories.PERIPHERALS)],
+    [Markup.callbackButton(categories.COMPLETE_PC, categories.COMPLETE_PC), Markup.callbackButton(categories.OTHER, categories.OTHER)],
+    [Markup.callbackButton('Torna alla Home', HOME)],
+  ]).resize();
+}
+
+function filterUpdates(ctx, updateType, minLength, maxLength) {
+  switch (updateType) {
+    case 'callback_query':
+      if (!ctx.callbackQuery) {
+        // If user sends a message, delete it in order to avoid chat cluttering
+        if (ctx.message) {
+          ctx.deleteMessage(ctx.message.message_id);
+        }
+        return null;
+      }
+      ctx.answerCbQuery();
+      const { data } = ctx.callbackQuery;
+      if (data === HOME) {
+        ctx.scene.leave();
+        return null;
+      }
+      return data;
+
+    case 'message':
+      if (!ctx.message) {
+        return null;
+      }
+      if (!ctx.message.text) {
+        // This could be a gif or a sticker and needs to be deleted in order to avoid chat cluttering
+        ctx.deleteMessage(ctx.message.message_id);
+        return null;
+      }
+      const { text, message_id } = ctx.message;
+
+      // Check if text is a bot command, commands are not accepted and need to be deleted
+      if (text.startsWith('/')) {
+        ctx.deleteMessage(message_id);
+        return null;
+      }
+
+      if (text.length > maxLength) {
+        ctx.reply('Il testo inserito è troppo lungo, riprova');
+        // ctx.deleteMessage(message_id);
+        return null;
+      }
+
+      if (text.length < minLength) {
+        ctx.reply('Il testo inserito è troppo corto, riprova');
+        // ctx.deleteMessage(message_id);
+        return null;
+      }
+
+      // If I get here, text is valid
+      return text;
+  }
+}
+
 module.exports = {
   startMenuMarkup,
-  generateCaption,
+  filterUpdates,
   generateSearchAnnouncement,
-  getPaymentMethodsMenuMarkup,
-  generatePaymentsInlineKeyboard,
   upsert,
   getWelcomeMessage,
+  getSelectCategoryMarkup,
 };

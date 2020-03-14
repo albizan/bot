@@ -16,6 +16,7 @@ const {
   priceConfirmationAndSelectShippingCosts,
   shippingCostsConfirmationAndShowPaymentsKeyboard,
   updatePaymentMethods,
+  goHome,
 } = require('./steps');
 
 const { NEW_INSERTION_WIZARD } = require('../../types/scenes.types');
@@ -38,7 +39,8 @@ const newInsertion = new WizardScene(
   priceValidation,
   priceConfirmationAndSelectShippingCosts,
   shippingCostsConfirmationAndShowPaymentsKeyboard,
-  updatePaymentMethods
+  updatePaymentMethods,
+  goHome
 );
 
 newInsertion.command(['home', 'quit', 'start'], ctx => {
