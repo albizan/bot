@@ -1,5 +1,7 @@
 // Main Menu
+exports.INSERTION_TYPE_SELECTOR = 'Insertion Type Selector';
 exports.NEW_INSERTION = 'Sell Product';
+exports.SEARCH_INSERTION = 'Seek Product';
 exports.SEARCH_INSERTION_BY_CATEGORY = 'Search Inserion';
 exports.BOT_INFO = 'Bot Info';
 exports.MANAGE_INSERTIONS = 'Manage Insertions';

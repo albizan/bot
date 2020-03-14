@@ -1,20 +1,11 @@
 const Markup = require('telegraf/markup');
 const { upsert } = require('./db/helper');
 
-const { package, memo, moneyBag, moneyFly, silhouette } = require('./emoji');
 // Import callback query types
-const { NEW_INSERTION, MANAGE_INSERTIONS, BOT_INFO, SEARCH_INSERTION_BY_CATEGORY, HOME, categories } = require('./types/callbacks.types');
-
-const generateSearchAnnouncement = (first_name, username, id, title, description, price, paymentMethods) => {
-  return `<b>NUOVO ANNUNCIO DI RICERCA</b>\n\n${package} Prodotto: ${package}\n${title}
-    \n\n${memo} Descrizione ${memo}\n${description}
-    \n\n${moneyBag} Prezzo: ${moneyBag}\n${price}€
-    \n\n${moneyFly} Metodi di pagamento:${moneyFly}\n${paymentMethods.join(' ')}
-    \n\n${silhouette} Contatto ${silhouette}\nUsername: @${username}\nID: ${id}`;
-};
+const { INSERTION_TYPE_SELECTOR, MANAGE_INSERTIONS, BOT_INFO, SEARCH_INSERTION_BY_CATEGORY, HOME, categories } = require('./types/callbacks.types');
 
 const startMenuMarkup = Markup.inlineKeyboard([
-  [Markup.callbackButton('Nuovo annuncio', NEW_INSERTION)],
+  [Markup.callbackButton('Nuovo annuncio', INSERTION_TYPE_SELECTOR)],
   [Markup.callbackButton('I miei annunci', MANAGE_INSERTIONS)],
   [Markup.callbackButton('Cerca per categoria', SEARCH_INSERTION_BY_CATEGORY)],
   [Markup.callbackButton('Info sul BOT', BOT_INFO)],
@@ -90,7 +81,6 @@ function filterUpdates(ctx, updateType, minLength, maxLength) {
 module.exports = {
   startMenuMarkup,
   filterUpdates,
-  generateSearchAnnouncement,
   upsert,
   getWelcomeMessage,
   getSelectCategoryMarkup,
