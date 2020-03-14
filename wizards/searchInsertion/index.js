@@ -1,6 +1,6 @@
 const WizardScene = require('telegraf/scenes/wizard');
 
-const { startMenuMarkup } = require('../../helper');
+const { startMenuMarkup, getWelcomeMessage } = require('../../helper');
 
 const {
   askForTitle,
