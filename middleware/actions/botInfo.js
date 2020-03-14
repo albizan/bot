@@ -6,7 +6,7 @@ function setupBotInfo(bot) {
     ctx.answerCbQuery();
     ctx.telegram.sendMessage(
       ctx.from.id,
-      '<b>Bot written in Ecmascript 2017 (ES8) - runtime nodejs 12.16.1. Hosted on Docker container on Scaleway VPS</b>\n\n<i>Coded bt <b>@Angry_Weasel</b>\nTested by @AlexUpdating</i>',
+      '<b>Bot written in Javascript - runtime nodejs 12.16.1. Hosted on Docker container on Scaleway VPS</b>\n\n<code>Coded by @Angry_Weasel\nTested by @AlexUpdating</code>',
       {
         parse_mode: 'HTML',
       }
