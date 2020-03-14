@@ -120,7 +120,7 @@ const priceConfirmationAndHandleSending = async ctx => {
         console.log(error);
         ctx.reply('Impossibile inviare il messaggio, riprova piu tardi');
       }
-      ctx.reply('Per tornare alla home ...', {
+      ctx.reply('Il tuo annuncio è stato inviato agli admin ed è in attesa di approvazione.\n\nPer tornare alla home ...', {
         reply_markup: Markup.inlineKeyboard([[Markup.callbackButton('... premi qui', HOME)]]),
       });
       break;
