@@ -164,6 +164,9 @@ function validateImagesAndAskForPrice(ctx) {
 
   // User wants to submit all sent images
   if (ctx.message.text === 'Avanti') {
+    if (!ctx.wizard.state.images) {
+      return;
+    }
     // User did not send any image
     if (ctx.wizard.state.images.length <= 0) {
       ctx.reply("<b>Inserisci almeno un'immagine</b>", {
