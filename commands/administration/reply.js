@@ -23,6 +23,7 @@ const setupReplyCommand = bot => {
       ctx.reply("Scrivi il messaggio dopo l'username");
       return;
     }
+    username = username.startsWith('@') ? username.slice(1) : username;
     try {
       const res = await knex('users')
         .select('id')
