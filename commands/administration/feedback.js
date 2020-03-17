@@ -30,7 +30,7 @@ function setupFeedbackCommand(bot) {
     if (args.length === 1) {
       const res = await getValidatedFeedbacksByUser(user.id);
       const avg = parseFloat(res[0].avg).toFixed(1);
-      const { count } = parseInt(res[0]);
+      const count = parseInt(res[0].count);
       if (count === 0) {
         ctx.reply(`Utente: @${username}\nNumero di feedback: ${count}`);
         return;
