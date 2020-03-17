@@ -1,6 +1,6 @@
 const commandParser = (ctx, next) => {
   if (ctx.updateSubTypes.includes('text')) {
-    const text = ctx.update.message.text.trim();
+    const text = allTrim(ctx.update.message.text);
     if (text.startsWith('/')) {
       const match = text.match(/^\/([^\s]+)\s?(.+)?/);
       let args = [];
@@ -23,5 +23,9 @@ const commandParser = (ctx, next) => {
   }
   return next();
 };
+
+function allTrim(str) {
+  return str.replace(/\s+/g, ' ').replace(/^\s+|\s+$/, '');
+}
 
 module.exports = commandParser;
