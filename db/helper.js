@@ -38,6 +38,12 @@ async function getUsers() {
   }
 }
 
+async function getUserFromUsername(username) {
+  return await knex('users')
+    .where({ username })
+    .first();
+}
+
 async function getInsertionsByUser(user_id) {
   return await knex('insertions')
     .where({ user_id })
@@ -75,5 +81,6 @@ module.exports = {
   getInsertionsByUser,
   getInsertionsByCategory,
   getUsers,
+  getUserFromUsername,
   upsert,
 };
