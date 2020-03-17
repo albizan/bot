@@ -1,6 +1,6 @@
 const commandParser = (ctx, next) => {
   if (ctx.updateSubTypes.includes('text')) {
-    const text = ctx.update.message.text;
+    const text = ctx.update.message.text.trim();
     if (text.startsWith('/')) {
       const match = text.match(/^\/([^\s]+)\s?(.+)?/);
       let args = [];
