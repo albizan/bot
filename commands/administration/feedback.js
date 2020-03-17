@@ -32,6 +32,10 @@ function setupFeedbackCommand(bot) {
       console.log(res);
       const avg = parseFloat(res[0].avg).toFixed(1);
       const { count } = res[0];
+      if (count === 0) {
+        ctx.reply(`Utente: @${username}\nNumero di feedback: ${count}`);
+        return;
+      }
       ctx.reply(`Utente: @${username}\nNumero di feedback: ${count}\nRating:${avg}/5`);
     } else if (args.length === 2) {
     } else {
