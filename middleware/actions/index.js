@@ -6,6 +6,7 @@ const setupSearchInsertionByCategory = require('./searchInsertionByCategory');
 const setupBotInfo = require('./botInfo');
 const setupReplyToAdmins = require('./replyToAdmins');
 const setupManageInsertions = require('./manageInsertions');
+const setupValidateFeedback = require('./validateFeedback');
 
 const setupActions = bot => {
   setupHome(bot);
@@ -16,6 +17,7 @@ const setupActions = bot => {
   setupBotInfo(bot);
   setupReplyToAdmins(bot);
   setupManageInsertions(bot);
+  setupValidateFeedback(bot);
 };
 
 module.exports = setupActions;
