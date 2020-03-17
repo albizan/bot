@@ -37,6 +37,13 @@ async function getUsers() {
     console.log(users);
   }
 }
+async function getUserById(user_id) {
+  try {
+    return await knex('users').where({ id: user_id });
+  } catch (error) {
+    console.log(users);
+  }
+}
 
 async function getUserFromUsername(username) {
   return await knex('users')
@@ -48,6 +55,26 @@ async function getInsertionsByUser(user_id) {
   return await knex('insertions')
     .where({ user_id })
     .whereNotNull('url');
+}
+
+async function validateFeedback(feedback_id) {
+  try {
+    return knex('feedbacks')
+      .where({ id: feedback_id })
+      .update({
+        isValidated: true,
+      })
+      .returning('id');
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function getValidatedFeedbacksByUser(user_id) {
+  return await knex('feedbacks')
+    .avg('feedback_rate')
+    .count()
+    .where({ feedback_receiver: user_id, isValidated: true });
 }
 
 function upsert(params) {
@@ -81,6 +108,9 @@ module.exports = {
   getInsertionsByUser,
   getInsertionsByCategory,
   getUsers,
+  getUserById,
   getUserFromUsername,
+  validateFeedback,
+  getValidatedFeedbacksByUser,
   upsert,
 };
