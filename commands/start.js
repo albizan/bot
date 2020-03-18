@@ -8,9 +8,10 @@ const logger = require('../logger');
 const { upsert, getWelcomeMessage } = require('../helper');
 
 function setupStartCommand(bot) {
-  bot.command(['start'], async ctx => {
+  bot.command('start', async ctx => {
     // If command is given in a group
     if (ctx.message.chat.type === 'supergroup') {
+      ctx.deleteMessage(ctx.message.message_id);
       ctx.reply('Per accedere al BOT...', {
         reply_markup: getBotUrlMarkup(),
       });
