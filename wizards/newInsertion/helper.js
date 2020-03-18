@@ -54,8 +54,8 @@ async function handleAnnounce(ctx) {
   const { username, id, first_name } = ctx.from;
 
   // Set max length for images
-  if (images.length > 8) {
-    images.length = 8;
+  if (images.length > 3) {
+    images.length = 3;
   }
 
   // generate array of inputMediaPhoto to be sent with sendMediaGroup
