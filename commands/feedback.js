@@ -1,4 +1,4 @@
-const { getUserFromUsername, getValidatedFeedbacksByUser, getUserById, upsert } = require('../../db/helper');
+const { getUserFromUsername, getValidatedFeedbacksByUser, getUserById, upsert } = require('../db/helper');
 const Markup = require('telegraf/markup');
 
 function setupFeedbackCommand(bot) {
