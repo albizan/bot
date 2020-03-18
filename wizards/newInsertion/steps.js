@@ -137,7 +137,7 @@ function confirmLocationAndAskForImages(ctx) {
   switch (data) {
     case NEXT_STEP:
       ctx.reply(
-        "<b>Invia al massimo 8 foto del prodotto</b>\n<em>Nelle immagini deve essere chiaramente visibile il tuo tag telegram\n\nQuando tutte le foto sono state caricate, premi sul pulsante 'Avanti'</em>",
+        "<b>Invia al massimo 3 foto del prodotto</b>\n<em>Nelle immagini deve essere presente un foglio di carta in cui si legga chiaramente il tuo username di Telegram\n\nQuando tutte le foto sono state caricate, premi sul pulsante 'Avanti'</em>\nPer tornare alla Home premi su 'Annulla'",
         {
           parse_mode: 'HTML',
           reply_markup: Markup.keyboard(['Avanti', 'Annulla']).resize(),
@@ -146,7 +146,7 @@ function confirmLocationAndAskForImages(ctx) {
       ctx.wizard.next();
       break;
     case PREVIOUS_STEP:
-      ctx.reply('<b>Inserisci la località di vendita</b>\nPer favore digita massimo 40 caratteri', {
+      ctx.reply('<b>Inserisci la località di vendita</b>', {
         parse_mode: 'HTML',
       });
       ctx.wizard.back();
