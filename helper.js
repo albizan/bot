@@ -78,10 +78,15 @@ function filterUpdates(ctx, updateType, minLength, maxLength) {
   }
 }
 
+function getBotUrlMarkup() {
+  return Markup.inlineKeyboard([[Markup.urlButton('...premi qua', process.env.BOT_URL)]]);
+}
+
 module.exports = {
   startMenuMarkup,
   filterUpdates,
   upsert,
   getWelcomeMessage,
   getSelectCategoryMarkup,
+  getBotUrlMarkup,
 };

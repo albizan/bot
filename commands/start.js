@@ -1,5 +1,5 @@
 // import markups
-const { startMenuMarkup } = require('../helper');
+const { startMenuMarkup, getBotUrlMarkup } = require('../helper');
 
 // Import logger
 const logger = require('../logger');
@@ -9,6 +9,13 @@ const { upsert, getWelcomeMessage } = require('../helper');
 
 function setupStartCommand(bot) {
   bot.command(['start'], async ctx => {
+    // If command is given in a group
+    if (ctx.message.chat.type === 'supergroup') {
+      ctx.reply('Per accedere al BOT...', {
+        reply_markup: getBotUrlMarkup(),
+      });
+      return;
+    }
     // Extract user's info and check if required fields are present. If they are not, tell user what's missing and return.
     const { id, username, first_name } = ctx.from;
     if (!username) {
@@ -46,9 +53,7 @@ function setupStartCommand(bot) {
         parse_mode: 'HTML',
       });
     } catch (error) {
-      ctx.reply(
-        'Sono un BOT, non posso contattarti in privato se prima non vai su @mitricvenbot e clicchi su avvia'
-      );
+      ctx.reply('Sono un BOT, non posso contattarti in privato se prima non vai su @mitricvenbot e clicchi su avvia');
       console.log(error);
       return;
     }
