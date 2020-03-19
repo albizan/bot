@@ -275,7 +275,7 @@ async function updatePaymentMethods(ctx) {
 }
 
 function goHome(ctx) {
-  filterUpdates(ctx);
+  filterUpdates(ctx, 'callback_query');
 }
 
 module.exports = {

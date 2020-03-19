@@ -3,6 +3,7 @@ const searchInsertion = require('./searchInsertion');
 const searchInsertionByCategory = require('./searchInsertionByCategory');
 const replyToAdmins = require('./replyToAdmins');
 const manageInsertions = require('./manageInsertions');
+const searchFeedback = require('./searchFeedback');
 
 module.exports = {
   newInsertion,
@@ -10,4 +11,5 @@ module.exports = {
   searchInsertionByCategory,
   replyToAdmins,
   manageInsertions,
+  searchFeedback,
 };

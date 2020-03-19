@@ -12,10 +12,10 @@ const commandParser = require('./commandParser');
 const setupActions = require('./actions');
 
 // Import Wizard Scenes
-const { newInsertion, searchInsertion, searchInsertionByCategory, replyToAdmins, manageInsertions } = require('../wizards');
+const { newInsertion, searchInsertion, searchInsertionByCategory, replyToAdmins, manageInsertions, searchFeedback } = require('../wizards');
 
 // Compose stage with given scenes
-const stage = new Stage([newInsertion, searchInsertion, searchInsertionByCategory, replyToAdmins, manageInsertions]);
+const stage = new Stage([newInsertion, searchInsertion, searchInsertionByCategory, replyToAdmins, manageInsertions, searchFeedback]);
 
 function setupMiddleware(bot) {
   bot.use(ignoreOldUpdates);

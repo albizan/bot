@@ -5,6 +5,7 @@ exports.SEARCH_INSERTION = 'Seek Product';
 exports.SEARCH_INSERTION_BY_CATEGORY = 'Search Inserion';
 exports.BOT_INFO = 'Bot Info';
 exports.MANAGE_INSERTIONS = 'Manage Insertions';
+exports.SEARCH_FEEDBACK = 'SEARCH_FEEDBACK';
 
 exports.REPLY_TO_ADMINS = 'Reply To Admins';
 exports.HOME = 'Home';
@@ -18,7 +19,7 @@ exports.payments = {
   HYPE: 'Hype',
   CASH: 'Contanti',
   TRANSFER: 'Bonifico',
-  POSTEPAY: 'Postepay'
+  POSTEPAY: 'Postepay',
 };
 
 exports.categories = {

@@ -2,12 +2,21 @@ const Markup = require('telegraf/markup');
 const { upsert } = require('./db/helper');
 
 // Import callback query types
-const { INSERTION_TYPE_SELECTOR, MANAGE_INSERTIONS, BOT_INFO, SEARCH_INSERTION_BY_CATEGORY, HOME, categories } = require('./types/callbacks.types');
+const {
+  INSERTION_TYPE_SELECTOR,
+  MANAGE_INSERTIONS,
+  BOT_INFO,
+  SEARCH_INSERTION_BY_CATEGORY,
+  SEARCH_FEEDBACK,
+  HOME,
+  categories,
+} = require('./types/callbacks.types');
 
 const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Nuovo annuncio', INSERTION_TYPE_SELECTOR)],
   [Markup.callbackButton('I miei annunci', MANAGE_INSERTIONS)],
   [Markup.callbackButton('Cerca per categoria', SEARCH_INSERTION_BY_CATEGORY)],
+  [Markup.callbackButton('Cerca feedback utente', SEARCH_FEEDBACK)],
   [Markup.callbackButton('Info sul BOT', BOT_INFO)],
 ]).resize();
 
@@ -82,6 +91,10 @@ function getBotUrlMarkup() {
   return Markup.inlineKeyboard([[Markup.urlButton('...premi qua', process.env.BOT_URL)]]);
 }
 
+function getGoHomeMarkup() {
+  return Markup.inlineKeyboard([[Markup.callbackButton('Torna alla Home', HOME)]]);
+}
+
 module.exports = {
   startMenuMarkup,
   filterUpdates,
@@ -89,4 +102,5 @@ module.exports = {
   getWelcomeMessage,
   getSelectCategoryMarkup,
   getBotUrlMarkup,
+  getGoHomeMarkup,
 };

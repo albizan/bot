@@ -7,6 +7,7 @@ const setupBotInfo = require('./botInfo');
 const setupReplyToAdmins = require('./replyToAdmins');
 const setupManageInsertions = require('./manageInsertions');
 const setupValidateFeedback = require('./validateFeedback');
+const setupSearchFeedback = require('./searchFeedback');
 
 const setupActions = bot => {
   setupHome(bot);
@@ -18,6 +19,7 @@ const setupActions = bot => {
   setupReplyToAdmins(bot);
   setupManageInsertions(bot);
   setupValidateFeedback(bot);
+  setupSearchFeedback(bot);
 };
 
 module.exports = setupActions;

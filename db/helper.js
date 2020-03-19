@@ -39,7 +39,9 @@ async function getUsers() {
 }
 async function getUserById(user_id) {
   try {
-    return await knex('users').where({ id: user_id });
+    return await knex('users')
+      .where({ id: user_id })
+      .first();
   } catch (error) {
     console.log(users);
   }
@@ -100,6 +102,11 @@ async function getInsertionsByCategory(category) {
   }
 }
 
+async function getFeedbacks(username) {
+  const { id } = await getUserFromUsername(username);
+  return await knex('feedbacks').where({ isValidated: true, feedback_receiver: id });
+}
+
 module.exports = {
   deleteInsertion,
   retreiveInsertionById,
@@ -112,5 +119,6 @@ module.exports = {
   getUserFromUsername,
   validateFeedback,
   getValidatedFeedbacksByUser,
+  getFeedbacks,
   upsert,
 };
