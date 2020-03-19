@@ -26,8 +26,9 @@ function getConditionsMarkup() {
 
 const generatePaymentsInlineKeyboard = paymentMethods => {
   return [
+    [Markup.callbackButton(`${paymentMethods.includes('Paypal') ? checkMark : ''} Paypal`, payments.PAYPAL)],
     [
-      Markup.callbackButton(`${paymentMethods.includes('Paypal') ? checkMark : ''} Paypal`, payments.PAYPAL),
+      Markup.callbackButton(`${paymentMethods.includes('Postepay') ? checkMark : ''} Postepay`, payments.POSTEPAY),
       Markup.callbackButton(`${paymentMethods.includes('Hype') ? checkMark : ''} Hype`, payments.HYPE),
     ],
     [

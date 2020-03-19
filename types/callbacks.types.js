@@ -18,6 +18,7 @@ exports.payments = {
   HYPE: 'Hype',
   CASH: 'Contanti',
   TRANSFER: 'Bonifico',
+  POSTEPAY: 'Postepay'
 };
 
 exports.categories = {
