@@ -103,7 +103,11 @@ async function getInsertionsByCategory(category) {
 }
 
 async function getFeedbacks(username) {
-  const { id } = await getUserFromUsername(username);
+  const user = await getUserFromUsername(username);
+  if (!user) {
+    return [];
+  }
+  const { id } = user;
   return await knex('feedbacks').where({ isValidated: true, feedback_receiver: id });
 }
 

@@ -16,7 +16,12 @@ async function validateUsernameAndGetFeedbacks(ctx) {
   }
   const username = text.startsWith('@') ? text.slice(1) : text;
   const feedbacks = await getFeedbacks(username);
-  const message = await buildMessageWithFeedbacks(feedbacks);
+  let message;
+  if (feedbacks.length === 0) {
+    message = 'Non ci sono feedback';
+  } else {
+    message = await buildMessageWithFeedbacks(feedbacks);
+  }
   ctx.reply(message, {
     reply_markup: getGoHomeMarkup(),
   });
