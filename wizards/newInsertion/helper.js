@@ -1,6 +1,6 @@
 const Markup = require('telegraf/markup');
 const knex = require('../../db');
-const { upsert } = require('../../db/helper');
+const { upsert, updateCaption } = require('../../db/helper');
 
 const { HOME, NEXT_STEP, PREVIOUS_STEP, categories, conditions, payments } = require('../../types/callbacks.types');
 
@@ -119,8 +119,11 @@ async function handleAnnounce(ctx) {
   });
 
   // Give captiojn to first image of media group
-  media[0].caption = generateCaption(announceId, category, username, title, description, value, paymentMethods, condition, location, shippingCosts);
+  const caption = generateCaption(announceId, category, username, title, description, value, paymentMethods, condition, location, shippingCosts);
+  media[0].caption = caption;
   try {
+    // update insertion in db with given caption
+    updateCaption(announceId, caption);
     ctx.telegram.sendMediaGroup(process.env.SECRET_CHAT_ID, media);
   } catch (error) {
     ctx.reply('Errore, impossibile inviare il tuo annuncio agli admin, il bot potrebbe essere in manutenzione');

@@ -1,9 +1,9 @@
 const Markup = require('telegraf/markup');
 
 const { HOME } = require('../../types/callbacks.types');
-const { deleteInsertion, getInsertionsByUser, retreiveInsertionById } = require('../../db/helper');
+const { deleteInsertion, getInsertionsByUser, retreiveInsertionById, getInsertionByUrl, setRemoved } = require('../../db/helper');
 const { filterUpdates } = require('../../helper');
-const { siren } = require('../../emoji');
+const { siren, checkMark } = require('../../emoji');
 
 async function showInsertions(ctx) {
   const { id } = ctx.from;
@@ -17,13 +17,26 @@ async function showInsertions(ctx) {
       ctx.wizard.next();
       return;
     }
-    ctx.telegram.sendMessage(id, `<b>${siren} HAI ${insertions.length} ANNUNCI PUBBLICATI</b>`, {
+    await ctx.telegram.sendMessage(id, `<b>${siren} HAI ${insertions.length} ANNUNCI PUBBLICATI</b>`, {
       parse_mode: 'HTML',
     });
-    for (insertion of insertions) {
-      await ctx.telegram.sendMessage(id, `${insertion.product}`, {
-        reply_markup: Markup.inlineKeyboard([[Markup.urlButton('Visualizza', insertion.url), Markup.callbackButton('Elimina', insertion.id)]]),
-      });
+    for (index in insertions) {
+      let soldButton;
+      if (insertions[index].isRemoved) {
+        soldButton = Markup.callbackButton(`${checkMark} Venduto ${checkMark}`, 'ignore');
+      } else {
+        soldButton = Markup.callbackButton('Segna come venduto', insertions[index].url);
+      }
+      try {
+        await ctx.telegram.sendMessage(id, `<b>${parseInt(index) + 1} - ${insertions[index].product}</b>`, {
+          parse_mode: 'HTML',
+          reply_markup: Markup.inlineKeyboard([
+            [soldButton],
+            [Markup.urlButton('Visualizza', insertions[index].url), Markup.callbackButton('Elimina', insertions[index].id)],
+          ]).resize(),
+        });
+        await ctx.telegram.sendSticker(id, 'CAACAgQAAx0CR0lurwACFCNedPfhYr86GIZzveDMgCGf9UHCuwACqwADKDlXD3QujfIUi33eGAQ');
+      } catch (error) {}
     }
     ctx.telegram.sendMessage(id, 'Per tornare alla home ...', {
       reply_markup: Markup.inlineKeyboard([[Markup.callbackButton('... premi qua', HOME)]]).resize(),
@@ -40,6 +53,24 @@ async function manageInsertion(ctx) {
   if (!data) {
     return;
   }
+  // If data is the url of the insertion in the channel
+  if (data.startsWith('https')) {
+    const [message_id] = data.split('/').slice(-1);
+    const { id, caption } = await getInsertionByUrl(data);
+    if (!caption) {
+      return;
+    }
+    try {
+      ctx.telegram.editMessageCaption(process.env.CHANNEL_USERNAME, message_id, undefined, `VENDUTO\n\n${caption}`);
+      setRemoved(id);
+      ctx.editMessageReplyMarkup(Markup.inlineKeyboard([[Markup.callbackButton(`${checkMark} Prodotto Venduto ${checkMark}`, 'ignore')]]));
+    } catch (error) {
+      console.log(error);
+    }
+
+    return;
+  }
+  console.log(data);
   const insertionId = parseInt(data);
   if (isNaN(insertionId)) {
     return;

@@ -111,6 +111,28 @@ async function getFeedbacks(username) {
   return await knex('feedbacks').where({ isValidated: true, feedback_receiver: id });
 }
 
+async function updateCaption(insertion_id, caption) {
+  await knex('insertions')
+    .where({ id: insertion_id })
+    .update({ caption: caption });
+}
+
+async function getInsertionByUrl(url) {
+  try {
+    return await knex('insertions')
+      .where({ url })
+      .first();
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function setRemoved(insertion_id) {
+  await knex('insertions')
+    .where({ id: insertion_id })
+    .update({ isRemoved: true });
+}
+
 module.exports = {
   deleteInsertion,
   retreiveInsertionById,
@@ -124,5 +146,8 @@ module.exports = {
   validateFeedback,
   getValidatedFeedbacksByUser,
   getFeedbacks,
+  updateCaption,
+  getInsertionByUrl,
+  setRemoved,
   upsert,
 };

@@ -1,5 +1,5 @@
 exports.up = function(knex) {
-  return knex.schema.createTable('users', function(table) {
+  knex.schema.createTable('users', function(table) {
     table
       .integer('id')
       .notNullable()
@@ -14,7 +14,7 @@ exports.up = function(knex) {
 };
 
 exports.down = function(knex) {
-  return knex.schema.dropTable('users');
+  knex.schema.dropTable('users');
 };
 
 exports.config = { transaction: false };
