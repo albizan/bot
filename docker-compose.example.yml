@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+  db:
+    container_name: telegram_bot_database
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD:
+      POSTGRES_DB:
+      POSTGRES_USER:
+    volumes:
+      - ./volumes:/data/postgres
+    ports:
+      - '5432:5432'
+  bot:
+    container_name: bot
+    image: bot:latest
+    environment:
+      BOT_TOKEN:
+      SECRET_CHAT_ID:
+      MIT_GROUP:
+      CHANNEL_USERNAME:
+      BOT_URL:
+      ADMINS:
+      DB_CONNECTION_STRING:
+    depends_on:
+      - db
