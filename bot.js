@@ -1,5 +1,6 @@
 const Telegraf = require('telegraf');
 const cronJob = require('./cron/sendMessage');
+const { getWelcomeMarkup } = require('./helper');
 
 // Import middleware setups
 const setupMiddleware = require('./middleware');
@@ -15,6 +16,12 @@ setupMiddleware(bot);
 
 // Setup Commands
 setupCommands(bot);
+
+bot.on('new_chat_members', ctx => {
+  ctx.reply(`Benvenuto nel Mercatino di Informatica e Tecnologia`, {
+    reply_markup: getWelcomeMarkup(),
+  });
+});
 
 // Run Cron Job
 const job = cronJob(bot);

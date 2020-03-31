@@ -99,6 +99,13 @@ function getPressHereToGoHomeMarkup() {
   return Markup.inlineKeyboard([[Markup.callbackButton('Torna alla Home', HOME)]]);
 }
 
+function getWelcomeMarkup() {
+  return Markup.inlineKeyboard([
+    [Markup.urlButton('BOT per la creazione di annunci', process.env.BOT_URL)],
+    [Markup.urlButton('Annunci di Vendita', 't.me/mitricvenbot'), Markup.urlButton('Annunci di Ricerca', 't.me/mitricerca')],
+  ]);
+}
+
 module.exports = {
   startMenuMarkup,
   filterUpdates,
@@ -108,4 +115,5 @@ module.exports = {
   getBotUrlMarkup,
   getGoHomeMarkup,
   getPressHereToGoHomeMarkup,
+  getWelcomeMarkup,
 };
