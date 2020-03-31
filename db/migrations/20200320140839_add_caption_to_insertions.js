@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = async function(knex) {
   return knex.schema.table('insertions', function(table) {
     table
       .text('caption')
@@ -7,7 +7,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = async function(knex) {
   return knex.schema.table('insertions', function(table) {
     table.dropColumn('caption');
   });

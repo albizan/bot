@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = async function(knex) {
   return knex.schema.createTable('messages', function(table) {
     table
       .string('message_id')
@@ -14,7 +14,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = async function(knex) {
   return knex.schema.dropTable('messages');
 };
 

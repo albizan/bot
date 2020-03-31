@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = async function(knex) {
   return knex.schema.createTable('feedbacks', function(table) {
     table
       .increments('id')
@@ -27,6 +27,6 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = async function(knex) {
   return knex.schema.dropTable('feedbacks');
 };

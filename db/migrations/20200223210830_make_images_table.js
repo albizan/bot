@@ -1,4 +1,4 @@
-exports.up = function(knex) {
+exports.up = async function(knex) {
   return knex.schema.createTable('images', function(table) {
     table
       .string('file_id')
@@ -14,7 +14,7 @@ exports.up = function(knex) {
   });
 };
 
-exports.down = function(knex) {
+exports.down = async function(knex) {
   return knex.schema.dropTable('images');
 };
 
