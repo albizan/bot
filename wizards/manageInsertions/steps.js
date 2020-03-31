@@ -2,7 +2,7 @@ const Markup = require('telegraf/markup');
 
 const { HOME } = require('../../types/callbacks.types');
 const { deleteInsertion, getInsertionsByUser, retreiveInsertionById, getInsertionByUrl, setRemoved } = require('../../db/helper');
-const { filterUpdates } = require('../../helper');
+const { filterUpdates, getPressHereToGoHomeMarkup } = require('../../helper');
 const { siren, checkMark } = require('../../emoji');
 
 async function showInsertions(ctx) {
@@ -12,12 +12,12 @@ async function showInsertions(ctx) {
     if (insertions.length === 0) {
       ctx.telegram.sendMessage(id, '<b>NON HAI ANNUNCI PUBBLICATI\n\nPer tornare alla home ...</b>', {
         parse_mode: 'HTML',
-        reply_markup: Markup.inlineKeyboard([[Markup.callbackButton('... premi qua', HOME)]]).resize(),
+        reply_markup: getPressHereToGoHomeMarkup(),
       });
       ctx.wizard.next();
       return;
     }
-    await ctx.telegram.sendMessage(id, `<b>${siren} HAI ${insertions.length} ANNUNCI PUBBLICATI</b>`, {
+    await ctx.telegram.sendMessage(id, `<b>${siren} HAI ${insertions.length} ${insertions.length === 1 ? 'ANNUNCIO ATTIVO' : 'ANNUNCI ATTIVI'}</b>`, {
       parse_mode: 'HTML',
     });
     for (index in insertions) {
@@ -31,15 +31,15 @@ async function showInsertions(ctx) {
         await ctx.telegram.sendMessage(id, `<b>${parseInt(index) + 1} - ${insertions[index].product}</b>`, {
           parse_mode: 'HTML',
           reply_markup: Markup.inlineKeyboard([
-            [soldButton],
-            [Markup.urlButton('Visualizza', insertions[index].url), Markup.callbackButton('Elimina', insertions[index].id)],
+            //[soldButton],
+            [Markup.urlButton('Visualizza', insertions[index].url) /* Markup.callbackButton('Elimina', insertions[index].id) */],
           ]).resize(),
         });
         await ctx.telegram.sendSticker(id, 'CAACAgQAAx0CR0lurwACFCNedPfhYr86GIZzveDMgCGf9UHCuwACqwADKDlXD3QujfIUi33eGAQ');
       } catch (error) {}
     }
     ctx.telegram.sendMessage(id, 'Per tornare alla home ...', {
-      reply_markup: Markup.inlineKeyboard([[Markup.callbackButton('... premi qua', HOME)]]).resize(),
+      reply_markup: getPressHereToGoHomeMarkup(),
     });
     ctx.wizard.next();
   } catch (error) {
@@ -54,7 +54,7 @@ async function manageInsertion(ctx) {
     return;
   }
   // If data is the url of the insertion in the channel
-  if (data.startsWith('https')) {
+  /* if (data.startsWith('https')) {
     const [message_id] = data.split('/').slice(-1);
     const { id, caption } = await getInsertionByUrl(data);
     if (!caption) {
@@ -69,9 +69,8 @@ async function manageInsertion(ctx) {
     }
 
     return;
-  }
-  console.log(data);
-  const insertionId = parseInt(data);
+  } */
+  /* const insertionId = parseInt(data);
   if (isNaN(insertionId)) {
     return;
   }
@@ -84,7 +83,7 @@ async function manageInsertion(ctx) {
     ctx.editMessageReplyMarkup(Markup.inlineKeyboard([[Markup.callbackButton(`${siren} Annuncio Eliminato ${siren}`, 'ignore')]]));
   } catch (error) {
     console.log(error);
-  }
+  } */
 }
 
 module.exports = {
