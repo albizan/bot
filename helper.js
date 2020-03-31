@@ -95,6 +95,10 @@ function getGoHomeMarkup() {
   return Markup.inlineKeyboard([[Markup.callbackButton('Torna alla Home', HOME)]]);
 }
 
+function getPressHereToGoHomeMarkup() {
+  return Markup.inlineKeyboard([[Markup.callbackButton('Torna alla Home', HOME)]]);
+}
+
 module.exports = {
   startMenuMarkup,
   filterUpdates,
@@ -103,4 +107,5 @@ module.exports = {
   getSelectCategoryMarkup,
   getBotUrlMarkup,
   getGoHomeMarkup,
+  getPressHereToGoHomeMarkup,
 };
