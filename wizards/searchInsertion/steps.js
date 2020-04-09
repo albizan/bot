@@ -51,7 +51,7 @@ async function confirmTitleAndAskForDescription(ctx) {
       break;
   }
 }
-const validateDescription = async ctx => {
+const validateDescription = async (ctx) => {
   const text = filterUpdates(ctx, 'message');
   if (!text) {
     return;
@@ -67,7 +67,7 @@ const validateDescription = async ctx => {
   return ctx.wizard.next();
 };
 
-const confirmDescriptionAndAskForPrice = async ctx => {
+const confirmDescriptionAndAskForPrice = async (ctx) => {
   const data = filterUpdates(ctx, 'callback_query', 5, 50);
   if (!data) {
     return;
@@ -90,20 +90,25 @@ const confirmDescriptionAndAskForPrice = async ctx => {
   }
 };
 
-const priceValidation = ctx => {
+const priceValidation = (ctx) => {
   const text = filterUpdates(ctx, 'message');
   if (!text) {
     return;
   }
   // Convert string into a floating point number
-  ctx.wizard.state.value = parseInt(text);
+  const price = parseInt(text);
+  if (isNaN(price)) {
+    ctx.deleteMessage();
+    return;
+  }
+  ctx.wizard.state.value = price;
   ctx.reply(`${moneyBag} Prezzo: ${ctx.wizard.state.value}€`, {
     reply_markup: insertionWizardPrompt(),
   });
   ctx.wizard.next();
 };
 
-const priceConfirmationAndHandleSending = async ctx => {
+const priceConfirmationAndHandleSending = async (ctx) => {
   const data = filterUpdates(ctx, 'callback_query', 5, 50);
   if (!data) {
     return;
