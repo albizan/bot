@@ -20,7 +20,7 @@ const startMenuMarkup = Markup.inlineKeyboard([
   [Markup.callbackButton('Info sul BOT', BOT_INFO)],
 ]).resize();
 
-const getWelcomeMessage = first_name => {
+const getWelcomeMessage = (first_name) => {
   return `Ciao <b>${first_name}</b>\n\nBenvenuto/a nel BOT ufficiale del gruppo MIT - Mercatino Informatica e Tecnologia\n\nQuesto bot ti permette di creare annunci di vendita per le tue componenti informatiche e non solo.\n\nPrima di essere pubblicati sul canale ufficiale @mitvendita, gli annunci verranno valutati ed eventualmente approvati dallo <b>STAFF</b>`;
 };
 
@@ -102,7 +102,7 @@ function getPressHereToGoHomeMarkup() {
 function getWelcomeMarkup() {
   return Markup.inlineKeyboard([
     [Markup.urlButton('BOT per la creazione di annunci', process.env.BOT_URL)],
-    [Markup.urlButton('Annunci di Vendita', 't.me/mitricvenbot'), Markup.urlButton('Annunci di Ricerca', 't.me/mitricerca')],
+    [Markup.urlButton('Annunci di Vendita', 'https://t.me/mitvendita'), Markup.urlButton('Annunci di Ricerca', 'https://t.me/mitricerca')],
   ]);
 }
 
