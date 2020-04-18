@@ -1,3 +1,7 @@
+/* 
+  This middleware parse incoming text and generates a string representing a command and a list of args
+*/
+
 const commandParser = (ctx, next) => {
   if (ctx.updateSubTypes.includes('text')) {
     const text = allTrim(ctx.update.message.text);
