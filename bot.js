@@ -17,11 +17,11 @@ setupMiddleware(bot);
 // Setup Commands
 setupCommands(bot);
 
-bot.on('new_chat_members', ctx => {
+/* bot.on('new_chat_members', ctx => {
   ctx.reply(`Benvenuto nel Mercatino di Informatica e Tecnologia`, {
     reply_markup: getWelcomeMarkup(),
   });
-});
+}); */
 
 // Run Cron Job
 const job = cronJob(bot);
